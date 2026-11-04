@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+.pytest_cache/
+.evermind-fallback.json
+.shadowbuyer-memory.json
+node_modules/
+frontend/dist/
+reports/
+legacy/frontend/node_modules/

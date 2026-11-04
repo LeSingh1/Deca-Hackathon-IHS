@@ -1,0 +1,15 @@
+# Zeabur service config for the Procure CRM frontend.
+# `zeabur deploy` (or git-push integration) picks this up.
+name = "procure-crm"
+
+[build]
+dockerfile = "Dockerfile"
+
+[run]
+port = 8080
+healthcheck = "/healthz"
+
+[env]
+# Backend URL is baked into the SPA bundle at build time (Vite uses VITE_*
+# prefix). Override here per environment if you ever move the backend.
+VITE_SHADOWBUYER_URL = "https://shadowbuyer.zeabur.app"

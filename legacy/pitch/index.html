@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ShadowBuyer — pitch deck</title>
+<style>
+  :root {
+    --bg: hsl(220 10% 6%);
+    --surface: hsl(220 10% 9%);
+    --surface-2: hsl(220 10% 12%);
+    --ink: hsl(220 8% 92%);
+    --ink-2: hsl(220 5% 64%);
+    --ink-3: hsl(220 5% 46%);
+    --line: hsl(220 8% 16%);
+    --accent: hsl(220 90% 64%);
+    --hb: hsl(354 80% 60%);
+    --dp: hsl(160 60% 50%);
+    --rf: hsl(45 95% 60%);
+    --sans: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font-family: var(--sans); letter-spacing: -0.01em; }
+  body { display: flex; flex-direction: column; }
+  .stage {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    padding: 56px clamp(32px, 6vw, 96px);
+    overflow: hidden;
+  }
+  .slide { width: 100%; max-width: 1120px; display: none; }
+  .slide.active { display: block; animation: in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  @keyframes in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .eyebrow {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--ink-2);
+  }
+  h1 { margin: 14px 0 0; font-size: clamp(38px, 6vw, 72px); font-weight: 600; line-height: 1.04; letter-spacing: -0.02em; }
+  h1 em { color: var(--ink-2); font-style: normal; }
+  h2 { margin: 0; font-size: clamp(28px, 4vw, 44px); font-weight: 600; line-height: 1.12; letter-spacing: -0.02em; }
+  p.lead { margin: 24px 0 0; max-width: 800px; font-size: clamp(16px, 1.6vw, 19px); line-height: 1.55; color: var(--ink-2); }
+  .mono { font-family: var(--mono); font-feature-settings: "tnum"; }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 14px clamp(32px, 6vw, 96px);
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    font-family: var(--mono); font-size: 11px; color: var(--ink-3); letter-spacing: 0.04em;
+  }
+  footer .pager { display: flex; gap: 8px; align-items: center; }
+  footer .pager .pip { width: 6px; height: 6px; border-radius: 50%; background: var(--line); transition: background 0.2s; }
+  footer .pager .pip.active { background: var(--accent); }
+  footer button {
+    background: transparent; border: 1px solid var(--line); color: var(--ink-2);
+    padding: 6px 10px; border-radius: 4px; font: inherit; cursor: pointer;
+  }
+  footer button:hover { color: var(--ink); border-color: var(--ink-2); }
+
+  /* ── Slide 2: architecture diagram ── */
+  .agents {
+    margin-top: 32px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .agent {
+    border: 1px solid var(--line); border-radius: 10px;
+    background: var(--surface); padding: 18px 18px 16px;
+    display: flex; flex-direction: column; gap: 8px;
+    min-height: 132px;
+  }
+  .agent.hb { border-left: 3px solid var(--hb); }
+  .agent.dp { border-left: 3px solid var(--dp); }
+  .agent.rf { border-left: 3px solid var(--rf); }
+  .agent.acc { border-left: 3px solid var(--accent); }
+  .agent .role { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-2); }
+  .agent .role.hb { color: var(--hb); }
+  .agent .role.dp { color: var(--dp); }
+  .agent .role.rf { color: var(--rf); }
+  .agent .name { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+  .agent .desc { color: var(--ink-2); font-size: 13px; line-height: 1.45; }
+  .agent .model { font-family: var(--mono); font-size: 10px; color: var(--ink-3); margin-top: auto; }
+
+  /* ── Slide 3: live demo placeholder ── */
+  .demo-frame {
+    margin-top: 28px;
+    border: 1px solid var(--line); border-radius: 14px;
+    background: linear-gradient(180deg, hsl(220 10% 11%), hsl(220 10% 7%));
+    aspect-ratio: 16 / 9; max-height: 560px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .demo-frame::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, hsl(220 90% 64% / 0.06), transparent 60%);
+  }
+  .demo-frame .play {
+    position: relative; width: 96px; height: 96px; border-radius: 50%;
+    background: var(--accent); display: grid; place-items: center;
+    box-shadow: 0 0 0 8px hsl(220 90% 64% / 0.12);
+  }
+  .demo-frame .play::after {
+    content: ""; width: 0; height: 0;
+    border-left: 22px solid hsl(220 30% 10%);
+    border-top: 14px solid transparent;
+    border-bottom: 14px solid transparent;
+    margin-left: 6px;
+  }
+  .demo-url {
+    position: absolute; bottom: 16px; left: 18px;
+    font-family: var(--mono); font-size: 11px; color: var(--ink-3); letter-spacing: 0.04em;
+  }
+
+  /* ── Slide 4: sponsor stack ── */
+  .sponsors {
+    margin-top: 32px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+  @media (max-width: 720px) { .sponsors { grid-template-columns: repeat(2, 1fr); } .agents { grid-template-columns: 1fr; } }
+  .sponsor {
+    border: 1px solid var(--line); border-radius: 8px;
+    background: var(--surface); padding: 14px 14px 12px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .sponsor .name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+  .sponsor .role { font-family: var(--mono); font-size: 10px; color: var(--ink-2); line-height: 1.4; }
+
+  /* ── Slide 5: ask ── */
+  .ask-grid {
+    margin-top: 28px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px;
+  }
+  @media (max-width: 720px) { .ask-grid { grid-template-columns: repeat(2, 1fr); } }
+  .metric {
+    border: 1px solid var(--line); border-radius: 10px; padding: 16px;
+    background: var(--surface);
+  }
+  .metric .k { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-2); }
+  .metric .v { font-family: var(--mono); margin-top: 6px; font-size: 22px; font-weight: 600; color: var(--rf); letter-spacing: -0.01em; }
+  .question {
+    margin-top: 32px; font-size: clamp(20px, 2.4vw, 28px); font-weight: 500; max-width: 900px; line-height: 1.4;
+  }
+  .question strong { color: var(--accent); }
+
+  /* ── Slide 1 hero ── */
+  .hero-eyebrow { color: var(--accent); }
+  .hero-stat {
+    margin-top: 36px;
+    display: inline-flex; gap: 12px; align-items: baseline;
+    padding: 14px 18px;
+    border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
+  }
+  .hero-stat .big { font-family: var(--mono); font-size: 38px; font-weight: 600; color: var(--rf); letter-spacing: -0.02em; }
+  .hero-stat .sub { color: var(--ink-2); font-size: 13px; }
+
+  /* Reduced-motion respect */
+  @media (prefers-reduced-motion: reduce) {
+    .slide.active { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<main class="stage">
+
+  <!-- ── Slide 1: Problem ── -->
+  <section class="slide" id="s1">
+    <div class="eyebrow hero-eyebrow">ShadowBuyer · Agent Forge AI Hackathon · 2026-05-16</div>
+    <h1>Six weeks of demos and contract games. <em>Collapsed to six hours.</em></h1>
+    <p class="lead">
+      Buying B2B software today takes six weeks of RFPs, security questionnaires,
+      sales-AE chess, and contract redlines. We collapsed it with a six-agent swarm
+      that researches vendors, negotiates against itself, drafts the AE email, and
+      redlines the MSA — live on stage.
+    </p>
+    <div class="hero-stat">
+      <span class="big mono">$5T</span>
+      <span class="sub">global procurement market — every CFO has lost a quarter to this</span>
+    </div>
+  </section>
+
+  <!-- ── Slide 2: Architecture ── -->
+  <section class="slide" id="s2">
+    <div class="eyebrow">Architecture · 6 agents · 11 sponsors wired</div>
+    <h2>One swarm. Two adversaries. One referee.</h2>
+    <p class="lead">
+      Every LLM call routes through TokenRouter. Every state write hits Evermind.
+      Every agent is decorated through AgentField. Every external API has a mock
+      fallback — the demo cannot crash.
+    </p>
+    <div class="agents">
+      <div class="agent acc"><span class="role">01 · Research</span><span class="name">Scout</span><span class="desc">Ranks observability vendors by G2, funding stability, outage history.</span><span class="model mono">Qwen3-Max · Bright Data · TokenRouter</span></div>
+      <div class="agent acc"><span class="role">02 · Outreach</span><span class="name">Quote Hunter</span><span class="desc">Fills Contact Sales forms, captures AE replies and competitor digs.</span><span class="model mono">Actionbook · Evermind</span></div>
+      <div class="agent hb"><span class="role hb">03 · Negotiator</span><span class="name">Hardball</span><span class="desc">Cheaper quote + quarter-end deadline + fallback POC. Plays ruthless.</span><span class="model mono">Qwen3-Max · TokenRouter</span></div>
+      <div class="agent dp"><span class="role dp">04 · Negotiator</span><span class="name">Diplomat</span><span class="desc">Multi-year price lock + reference customer + expansion rights.</span><span class="model mono">GLM-5.1 · Z.ai · TokenRouter</span></div>
+      <div class="agent rf"><span class="role rf">05 · Referee</span><span class="name">Verdict</span><span class="desc">Picks the winning play and drafts the AE email. Hardball opens, Diplomat closes.</span><span class="model mono">Qwen · TokenRouter</span></div>
+      <div class="agent acc"><span class="role">06 · Legal</span><span class="name">Contract Diff</span><span class="desc">Compares vendor MSA to standard template via clause embeddings. 15 redlines.</span><span class="model mono">Qwen · Nosana</span></div>
+    </div>
+  </section>
+
+  <!-- ── Slide 3: Live demo placeholder ── -->
+  <section class="slide" id="s3">
+    <div class="eyebrow">Live demo · ~90 seconds</div>
+    <h2>Watch our two agents disagree.</h2>
+    <p class="lead">
+      Hardball pulls down via competitor leverage. Diplomat pulls down via partnership
+      terms. The Referee picks the winning play, the price walks from $195 to $157.50,
+      and the email to Datadog's AE writes itself. Then Contract Diff flags 15 deviations
+      in their MSA — including an auto-renewal trap and a missing data-deletion clause.
+    </p>
+    <div class="demo-frame">
+      <div class="play"></div>
+      <div class="demo-url mono">SWITCH TAB · https://&lt;LIVE_URL&gt;/swarm</div>
+    </div>
+  </section>
+
+  <!-- ── Slide 4: Sponsor stack ── -->
+  <section class="slide" id="s4">
+    <div class="eyebrow">Built on · 11 of 11 sponsors wired with real code references</div>
+    <h2>Every sponsor does real work.</h2>
+    <p class="lead">
+      Audit live at <span class="mono">/api/sponsor-health</span> — every chip on the swarm
+      page lights green as keys flip live. Mock fallback exists so the demo cannot crash,
+      but the live path is real.
+    </p>
+    <div class="sponsors">
+      <div class="sponsor"><span class="name">AgentField</span><span class="role">Orchestrates 6 agents via @agent decorators</span></div>
+      <div class="sponsor"><span class="name">TokenRouter</span><span class="role">Routes every LLM call · Qwen, Z.ai, OpenAI</span></div>
+      <div class="sponsor"><span class="name">Qwen Cloud</span><span class="role">Scout, Hardball (Qwen3-Max), Referee</span></div>
+      <div class="sponsor"><span class="name">Z.ai · GLM-5.1</span><span class="role">Diplomat — partnership voice</span></div>
+      <div class="sponsor"><span class="name">Evermind</span><span class="role">Vendor profiles, quotes, trash-talk, decisions</span></div>
+      <div class="sponsor"><span class="name">Nosana</span><span class="role">Clause-similarity embeddings for Contract Diff</span></div>
+      <div class="sponsor"><span class="name">Bright Data</span><span class="role">G2 + funding + outage scrape for Scout</span></div>
+      <div class="sponsor"><span class="name">Actionbook</span><span class="role">Fills Contact Sales forms, captures AE replies</span></div>
+      <div class="sponsor"><span class="name">Zeabur</span><span class="role">Live deployment · Dockerfile + autodeploy</span></div>
+      <div class="sponsor"><span class="name">Qoder</span><span class="role">The codebase was built with Qoder</span></div>
+      <div class="sponsor"><span class="name">Butterbase</span><span class="role">Vendor / Quote / Contract workspace UI</span></div>
+    </div>
+  </section>
+
+  <!-- ── Slide 5: Ask ── -->
+  <section class="slide" id="s5">
+    <div class="eyebrow">The ask</div>
+    <h2>One deal, six hours, $225K saved.</h2>
+    <p class="lead">
+      Datadog at 500 hosts. List $195/host/mo. Negotiated to $157.50.
+      Hardball won round one with the competing offer and the quarter-end clock;
+      Diplomat closed with the 36-month price-lock wrapper.
+    </p>
+    <div class="ask-grid">
+      <div class="metric"><div class="k">List · $/host/mo</div><div class="v">$195</div></div>
+      <div class="metric"><div class="k">Final · $/host/mo</div><div class="v">$157.50</div></div>
+      <div class="metric"><div class="k">Discount vs list</div><div class="v">19.2%</div></div>
+      <div class="metric"><div class="k">Annual savings</div><div class="v">$225,000</div></div>
+    </div>
+    <p class="question">
+      Procurement is a $5T market. Every CFO in this room has lost a quarter to this. <br>
+      <strong>How many software contracts did you sign last year? Would you sign the next one with us?</strong>
+    </p>
+  </section>
+
+</main>
+
+<footer>
+  <div>
+    <span>ShadowBuyer</span> · <span class="mono">github.com/LeSingh1/shadowbuyer</span> · <span class="mono">github.com/rhthbandaru-star/visual-procurement-studio</span>
+  </div>
+  <div class="pager">
+    <span class="pip" data-pip="1"></span>
+    <span class="pip" data-pip="2"></span>
+    <span class="pip" data-pip="3"></span>
+    <span class="pip" data-pip="4"></span>
+    <span class="pip" data-pip="5"></span>
+    <span class="mono" id="counter" style="margin: 0 10px;">1 / 5</span>
+    <button id="prev" aria-label="Previous slide">←</button>
+    <button id="next" aria-label="Next slide">→</button>
+    <button id="full" aria-label="Toggle fullscreen">⤢</button>
+  </div>
+</footer>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const pips   = Array.from(document.querySelectorAll('[data-pip]'));
+  const counter = document.getElementById('counter');
+  let i = 0;
+
+  function show(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((el, idx) => el.classList.toggle('active', idx === i));
+    pips.forEach((el, idx) => el.classList.toggle('active', idx === i));
+    counter.textContent = `${i + 1} / ${slides.length}`;
+    history.replaceState(null, '', `#${i + 1}`);
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown' || e.key === 'Enter') { e.preventDefault(); show(i + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'Backspace') { e.preventDefault(); show(i - 1); }
+    else if (e.key === 'Home') { show(0); }
+    else if (e.key === 'End') { show(slides.length - 1); }
+    else if (e.key === 'f' || e.key === 'F') { toggleFs(); }
+  });
+
+  document.getElementById('prev').onclick = () => show(i - 1);
+  document.getElementById('next').onclick = () => show(i + 1);
+  document.getElementById('full').onclick = toggleFs;
+  pips.forEach((el, idx) => el.addEventListener('click', () => show(idx)));
+
+  function toggleFs() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  }
+
+  // Boot to hash slide if present
+  const hash = parseInt((location.hash || '#1').replace('#', ''), 10);
+  show(Number.isFinite(hash) ? hash - 1 : 0);
+</script>
+
+</body>
+</html>

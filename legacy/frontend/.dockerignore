@@ -1,0 +1,14 @@
+node_modules
+dist
+dist-spa
+.output
+.tanstack
+.nitro
+.wrangler
+.vinxi
+.git
+.env.local
+*.log
+.DS_Store
+.claude
+README.md

@@ -1,0 +1,18 @@
+# Zeabur service config. `zeabur deploy` (or git-push integration) picks this up.
+name = "shadowbuyer"
+
+[build]
+dockerfile = "Dockerfile"
+
+[run]
+port = 8000
+healthcheck = "/healthz"
+
+[env]
+# Required when live keys are added. Empty values keep mocks active.
+TOKENROUTER_API_KEY = ""
+QWEN_API_KEY = ""
+ZAI_API_KEY = ""
+EVERMIND_API_KEY = ""
+NOSANA_ENDPOINT = ""
+BRIGHTDATA_API_KEY = ""

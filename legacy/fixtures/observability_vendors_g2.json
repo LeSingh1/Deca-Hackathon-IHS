@@ -1,0 +1,12 @@
+{
+  "_source": "Mock Bright Data scrape of G2 + Crunchbase for observability category. Person B replaces with real scrape.",
+  "category": "observability",
+  "scraped_at": "2026-05-16T10:42:11Z",
+  "vendors": [
+    {"name": "Datadog", "g2_rating": 4.3, "g2_reviews": 542, "funding_status": "public", "last_outage_iso": "2026-03-08", "notable_logos": ["Shopify", "Samsung", "Whole Foods"]},
+    {"name": "New Relic", "g2_rating": 4.3, "g2_reviews": 415, "funding_status": "private (Francisco Partners)", "last_outage_iso": "2026-04-12", "notable_logos": ["GitHub", "Domino's", "World Fuel Services"]},
+    {"name": "Honeycomb", "g2_rating": 4.5, "g2_reviews": 188, "funding_status": "private", "last_outage_iso": "2025-11-22", "notable_logos": ["Slack", "HelloFresh", "Vanguard"]},
+    {"name": "Grafana Cloud", "g2_rating": 4.5, "g2_reviews": 281, "funding_status": "private", "last_outage_iso": "2026-02-19", "notable_logos": ["Bloomberg", "PayPal", "JPMorgan"]},
+    {"name": "Splunk", "g2_rating": 4.3, "g2_reviews": 826, "funding_status": "Cisco-owned", "last_outage_iso": "2026-01-30", "notable_logos": ["Coca-Cola", "Domino's", "Carnival"]}
+  ]
+}

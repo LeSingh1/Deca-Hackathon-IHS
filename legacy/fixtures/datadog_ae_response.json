@@ -1,0 +1,12 @@
+{
+  "_source": "Mock AE response to ShadowBuyer's Contact Sales submission. Shape matches doc spec. Person B replaces this with real Actionbook capture when available.",
+  "vendor": "Datadog",
+  "ae_email": "morgan.chen@datadog.com",
+  "ae_name": "Morgan Chen",
+  "first_quote": "$2,340/host/year",
+  "discount_offered": "10% Annual",
+  "competitor_dig": "We're more reliable than New Relic during incidents, and Honeycomb falls over above 100 hosts.",
+  "quarter_end_iso": "2026-06-30",
+  "responded_at": "2026-05-16T11:14:22Z",
+  "hosts_quoted": 500
+}

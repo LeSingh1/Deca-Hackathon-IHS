@@ -1,0 +1,19 @@
+{
+  "_source": "ShadowBuyer standard MSA template — our negotiating baseline.",
+  "clauses": [
+    {"key": "limitation_of_liability", "title": "Limitation of Liability", "text": "Vendor's aggregate liability is capped at the greater of (a) twelve (12) months of fees paid in the trailing year or (b) $1,000,000."},
+    {"key": "indemnification", "title": "Indemnification", "text": "Vendor will defend, indemnify, and hold Customer harmless from third-party claims arising from Vendor's IP infringement, gross negligence, or willful misconduct."},
+    {"key": "data_processing", "title": "Data Processing Addendum", "text": "Standard SCCs and DPA attached as Exhibit A. Customer data may not be used for model training without written consent. Data residency: US-East."},
+    {"key": "data_deletion", "title": "Data Deletion on Termination", "text": "Vendor shall delete all Customer data within thirty (30) days of termination and provide written certification of deletion."},
+    {"key": "auto_renewal", "title": "Auto-Renewal", "text": "Subscription auto-renews for successive 12-month terms unless either party gives written notice at least thirty (30) days before the current term ends."},
+    {"key": "price_lock", "title": "Price Lock", "text": "Per-unit pricing is locked for the initial term. Year-2 and beyond price increases capped at five percent (5%) annually."},
+    {"key": "termination_for_convenience", "title": "Termination for Convenience", "text": "Customer may terminate this Agreement for convenience upon sixty (60) days written notice, with a pro-rated refund of prepaid fees."},
+    {"key": "sla_credits", "title": "SLA Credits", "text": "Service Levels: 99.9% monthly uptime. Credits issued as 10% of monthly fee for each 0.1% below target, up to 100% of monthly fee."},
+    {"key": "subprocessors", "title": "Subprocessors", "text": "Vendor maintains a public list of subprocessors. Customer has the right to object to new subprocessors within fifteen (15) days of notice; failure to resolve objection allows termination."},
+    {"key": "audit_rights", "title": "Audit Rights", "text": "Customer may audit Vendor's compliance once per year on thirty (30) days' notice. Vendor will provide SOC 2 Type II reports annually."},
+    {"key": "confidentiality", "title": "Confidentiality", "text": "Confidentiality obligations survive for five (5) years after termination. Trade secrets protected indefinitely."},
+    {"key": "ip_assignment", "title": "IP Assignment", "text": "Each party retains its pre-existing IP. Customer owns all data and any derivatives. Vendor owns the Service and improvements thereto."},
+    {"key": "warranty", "title": "Warranty", "text": "Vendor warrants the Service will materially conform to documentation and be free from material defects. Sole remedy: re-performance or refund."},
+    {"key": "governing_law", "title": "Governing Law & Venue", "text": "Delaware law. Disputes resolved by binding arbitration in San Francisco, California under AAA Commercial Rules."}
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "_source": "Mock Datadog MSA — realistic deviations from the ShadowBuyer standard. Replace with real captured MSA when available.",
+  "vendor": "Datadog",
+  "clauses": [
+    {"key": "limitation_of_liability", "title": "Limitation of Liability", "text": "Vendor's aggregate liability shall not exceed three (3) months of fees paid under the applicable Order Form. Excludes consequential, indirect, and lost-profits damages."},
+    {"key": "indemnification", "title": "Indemnification", "text": "Vendor will indemnify Customer solely for direct IP infringement claims. Indemnity excludes claims arising from Customer modifications, combinations, or open-source components."},
+    {"key": "data_processing", "title": "Data Processing Addendum", "text": "DPA available upon request. Customer telemetry and metadata may be used to improve the Service, including model training and benchmarking, on an aggregated and de-identified basis."},
+    {"key": "auto_renewal", "title": "Auto-Renewal", "text": "Subscription auto-renews for successive 12-month terms. Customer must provide written non-renewal notice at least ninety (90) days before the end of the current term."},
+    {"key": "price_lock", "title": "Price Lock", "text": "Vendor reserves the right to adjust per-unit pricing at each renewal at vendor's then-current list rates."},
+    {"key": "termination_for_convenience", "title": "Termination for Convenience", "text": "Customer may not terminate for convenience during any committed term. Early termination requires payment of all remaining committed fees."},
+    {"key": "sla_credits", "title": "SLA Credits", "text": "Service Levels: 99.5% monthly uptime, measured on a per-region basis. Credits capped at 10% of monthly fee. Customer must request credits in writing within thirty (30) days."},
+    {"key": "subprocessors", "title": "Subprocessors", "text": "Vendor may engage subprocessors at its discretion. Vendor will use commercially reasonable efforts to notify Customer of material changes."},
+    {"key": "audit_rights", "title": "Audit Rights", "text": "Vendor will make available, upon written request and Vendor's reasonable discretion, the most recent SOC 2 Type II report under NDA. No on-site audit rights."},
+    {"key": "confidentiality", "title": "Confidentiality", "text": "Confidentiality obligations survive for three (3) years after termination."},
+    {"key": "ip_assignment", "title": "IP Assignment", "text": "Each party retains its pre-existing IP. Vendor receives a perpetual, royalty-free license to any feedback, suggestions, or ideas provided by Customer."},
+    {"key": "warranty", "title": "Warranty", "text": "THE SERVICE IS PROVIDED \"AS IS\" WITHOUT WARRANTY OF ANY KIND. VENDOR DISCLAIMS ALL IMPLIED WARRANTIES INCLUDING MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE."},
+    {"key": "governing_law", "title": "Governing Law & Venue", "text": "New York law. Exclusive jurisdiction in the courts of New York County, New York. Jury trial waived."},
+    {"key": "publicity", "title": "Publicity Rights", "text": "Customer grants Vendor the right to use Customer's name and logo on Vendor's customer list and marketing materials without further consent."}
+  ]
+}
