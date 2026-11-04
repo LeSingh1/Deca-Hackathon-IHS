@@ -1,7 +1,7 @@
 import type { Pace } from "../lib/api";
 
 export type Theme = "system" | "light" | "dark";
-const SERVICE_LABEL: Record<string, string> = { claude: "Claude", stripe: "Stripe", twilio: "Twilio", memory: "Memory" };
+const SERVICE_LABEL: Record<string, string> = { claude: "Claude", stripe: "Stripe", twilio: "Twilio" };
 
 export function Header({
   services,

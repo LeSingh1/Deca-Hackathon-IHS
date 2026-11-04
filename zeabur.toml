@@ -15,4 +15,3 @@ STRIPE_SECRET_KEY = ""          # must be sk_test_...; live keys are refused
 TWILIO_ACCOUNT_SID = ""
 TWILIO_AUTH_TOKEN = ""
 TWILIO_FROM_NUMBER = ""
-EVERMIND_API_KEY = ""

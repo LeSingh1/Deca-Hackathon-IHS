@@ -38,4 +38,4 @@ The product, customer, money math, agents, UI and integrations are new:
 - The **swarm shape**: a Hardball and a Diplomat negotiator compete and a Referee picks.
 - The **mock-fallback contract**: zero keys = deterministic demo; any live failure degrades to fixtures.
 - The **paced SSE generator** pattern and live/mock status chips (formerly `/api/sponsor-health`).
-- The **memory adapter interface** (`write`/`read` with Evermind live and a local JSON fallback). `src/memory/store.py` is a rewrite with new namespaces: owner profiles, statements, decisions, tactics.
+- The idea of **persisting run outcomes** so the next run starts smarter. `src/memory/store.py` is new: a plain local JSON store (no Evermind) with namespaces for owner profiles, statements, decisions and tactics.

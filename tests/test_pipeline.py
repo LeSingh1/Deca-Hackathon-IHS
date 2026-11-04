@@ -201,7 +201,7 @@ def test_api_simulator_flow() -> None:
     from src.app import app
     c = TestClient(app)
     h = c.get("/healthz").json()
-    assert h["ok"] and set(h["services"]) == {"claude", "stripe", "twilio", "memory"}
+    assert h["ok"] and set(h["services"]) == {"claude", "stripe", "twilio"}
     r = c.post("/api/demo/start", params={"pace": "instant"}).json()
     run_id = r["run_id"]
     for _ in range(100):

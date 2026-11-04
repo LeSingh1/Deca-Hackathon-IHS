@@ -50,7 +50,7 @@ Owner texts statement photo (Twilio SMS or the phone simulator, same webhook han
 | Rep email | **Dry run**: drafted and shown, never sent |
 | Savings sweep | **Stripe test mode** PaymentIntent with metadata `bucket=Tax & Rainy-Day reserve`; `sk_live_` keys are refused. Production rail would be FedNow. |
 | SMS | Twilio sandbox/trial number if configured; otherwise the in-app phone simulator (same handler) |
-| Memory | Evermind-compatible KV if configured; otherwise a local JSON file |
+| Memory | Local JSON file: owner profile, past statements, decisions, winning tactics |
 
 ## Models (`src/llm/models.py`, the only place they're set)
 
@@ -90,7 +90,6 @@ Then click **Run demo**, or text a statement photo to your Twilio number. Choose
 | `ANTHROPIC_API_KEY` | every agent to live Claude |
 | `STRIPE_SECRET_KEY` (`sk_test_…` only) | savings sweep to a real Stripe test-mode PaymentIntent |
 | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` | SMS channel (webhook: `POST /sms/twilio`) |
-| `EVERMIND_API_KEY` (+ `EVERMIND_BASE_URL`) | memory to Evermind |
 | `SHADOWBUYER_LLM=mock` | force mock even with a key |
 | `SHADOWBUYER_APPROVAL_TIMEOUT_S` | how long a run waits for YES (default 900) |
 
@@ -125,7 +124,7 @@ src/
   llm/          models.py (agent → model), client.py (providers, structured, streaming, caching, cost), guard.py
   executor/     approval-gated actions (Stripe test mode, dry-run email, fee receipt)
   channels/     Twilio SMS
-  memory/       Evermind-compatible store with local fallback
+  memory/       local JSON memory (next month's run starts from what worked)
   report/       PDF
   contract.py   frozen SSE event contract
   pipeline.py   the swarm, as a generator of contract events

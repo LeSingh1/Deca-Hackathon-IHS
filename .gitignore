@@ -3,7 +3,6 @@ __pycache__/
 .venv/
 .env
 .pytest_cache/
-.evermind-fallback.json
 .shadowbuyer-memory.json
 node_modules/
 frontend/dist/
