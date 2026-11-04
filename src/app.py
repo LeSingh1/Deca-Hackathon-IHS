@@ -107,7 +107,9 @@ def run_events(run_id: str, request: Request) -> StreamingResponse:
     run = runs.get(run_id)
     if not run:
         raise HTTPException(404, "unknown run")
-    start = int(request.query_params.get("from", 0))
+    # EventSource reconnects send Last-Event-ID; resume right after it (no duplicates).
+    last = request.headers.get("last-event-id")
+    start = int(last) + 1 if last and last.isdigit() else int(request.query_params.get("from", 0))
 
     def gen():
         for ev in run.subscribe(start):
