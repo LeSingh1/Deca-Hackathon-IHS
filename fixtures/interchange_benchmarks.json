@@ -1,0 +1,10 @@
+{
+  "illustrative": true,
+  "source": "Illustrative benchmark modeled on published Visa USA and Mastercard U.S. interchange schedules (restaurant categories) and typical interchange-plus markups for $1M-$2M/yr merchants. Not a quote.",
+  "as_of": "2026-10",
+  "restaurant_blended_interchange_rate": 0.018624,
+  "network_assessment_rate": 0.001413,
+  "fair_markup": {"markup_pct": 0.0020, "per_txn": 0.07, "monthly_fees": {}},
+  "fair_markup_range": {"markup_pct": [0.0015, 0.0030], "per_txn": [0.05, 0.10]},
+  "notes": "For a full-service restaurant with ~$48 average ticket and a high card-present share, a fair interchange-plus deal is roughly 0.15%-0.30% + $0.05-$0.10 per transaction with no monthly junk fees."
+}

@@ -1,0 +1,20 @@
+{
+  "_note": "Fictional MCA offer from a fictional funder.",
+  "illustrative": true,
+  "lender": "FastFund Capital",
+  "product": "Revenue Advance (purchase of future receivables)",
+  "received_via": "SMS + email, 2026-10-28",
+  "advance": 40000.00,
+  "factor_rate": 1.35,
+  "holdback_pct": 0.06,
+  "origination_fee": 1200.00,
+  "pitch": "Get $40,000 in 24 hours. Simple 1.35 factor - no interest, no APR, no hassle!",
+  "clauses": [
+    {"key": "purchase_price", "title": "Purchase price", "text": "Funder purchases $54,000.00 of Merchant's future receivables (the 'Purchased Amount') for $40,000.00 (the 'Purchase Price'), a factor of 1.35."},
+    {"key": "origination", "title": "Origination & underwriting fee", "text": "An origination and underwriting fee of $1,200.00 shall be deducted from the Purchase Price at funding."},
+    {"key": "fixed_daily_debit", "title": "Daily remittance", "text": "Merchant authorizes Funder to debit a fixed daily amount of $197.26 by ACH, representing 6% of estimated daily receivables. Funder is not obligated to adjust the daily amount."},
+    {"key": "no_prepay_discount", "title": "Early payoff", "text": "The full Purchased Amount is owed regardless of the date of delivery. No discount is provided for early payment."},
+    {"key": "confession_of_judgment", "title": "Confession of judgment", "text": "Merchant and Guarantor irrevocably authorize entry of judgment against them for the unpaid Purchased Amount plus 25% attorney fees, without notice or hearing."},
+    {"key": "blanket_lien", "title": "Security interest", "text": "Merchant grants Funder a security interest in all present and future accounts, inventory, equipment and proceeds, and agrees not to obtain any other financing while any amount remains owed."}
+  ]
+}

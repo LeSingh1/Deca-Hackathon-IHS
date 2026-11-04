@@ -1,0 +1,26 @@
+{
+  "illustrative": true,
+  "_note": "Processor names are fictional. Terms are illustrative of the market, not real quotes.",
+  "source": "Illustrative competitor terms for a $1.2M/yr full-service restaurant; modeled on published interchange-plus and flat-rate price sheets",
+  "as_of": "2026-10",
+  "quotes": [
+    {
+      "key": "harbor",
+      "name": "Harbor Payments",
+      "label": "Harbor Payments - IC+ 0.20% + $0.08",
+      "plan": {"label": "Harbor Payments IC+ 0.20% + $0.08 + $10/mo", "model": "ic_plus", "markup_pct": 0.0020, "per_txn": 0.08, "monthly_fees": {"account fee": 10.0}, "keeps_equipment_lease": false},
+      "terms": "Month-to-month, no ETF, free terminal on 12-month volume commitment",
+      "source": "Illustrative written quote (fictional processor)",
+      "as_of": "2026-10"
+    },
+    {
+      "key": "flatrate",
+      "name": "Typical flat-rate POS",
+      "label": "Flat-rate POS - 2.6% + $0.15",
+      "plan": {"label": "Flat 2.6% + $0.15", "model": "flat", "flat_pct": 0.026, "per_txn": 0.15, "monthly_fees": {}, "keeps_equipment_lease": false},
+      "terms": "No contract; hardware purchased separately",
+      "source": "Illustrative of common published in-person flat rates",
+      "as_of": "2026-10"
+    }
+  ]
+}

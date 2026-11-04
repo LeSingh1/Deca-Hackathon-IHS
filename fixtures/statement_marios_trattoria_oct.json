@@ -1,0 +1,32 @@
+{
+  "_note": "Fictional statement for a fictional restaurant. Processor and lease company names are invented.",
+  "illustrative": true,
+  "merchant": {
+    "name": "Mario's Trattoria",
+    "owner": "Maria Russo",
+    "mid": "8841-2207-1193",
+    "address": "214 Fulton St, Brooklyn, NY",
+    "type": "Full-service restaurant, single location"
+  },
+  "processor": "Keystone Merchant Services",
+  "period": {"start": "2026-10-01", "end": "2026-10-31", "label": "October 2026"},
+  "monthly_volume": 100000.00,
+  "transaction_count": 2074,
+  "annual_volume_estimate": 1200000.00,
+  "card_mix": {"visa": 0.52, "mastercard": 0.28, "amex": 0.13, "discover": 0.07},
+  "stated_total_fees": 3277.40,
+  "line_items": [
+    {"id": "L01", "description": "Interchange charges (pass-through)", "amount": 1862.40, "detail": "Visa/MC/Discover/Amex OptBlue"},
+    {"id": "L02", "description": "Card brand assessments & network fees", "amount": 141.30, "detail": "Visa/MC/Discover/Amex"},
+    {"id": "L03", "description": "Discount fee - qualified", "amount": 196.00, "detail": "0.49% x $40,000.00"},
+    {"id": "L04", "description": "Mid-qualified surcharge", "amount": 326.40, "detail": "0.85% x $38,400.00"},
+    {"id": "L05", "description": "Non-qualified surcharge", "amount": 356.40, "detail": "1.65% x $21,600.00"},
+    {"id": "L06", "description": "Authorization fee", "amount": 207.40, "detail": "$0.10 x 2,074"},
+    {"id": "L07", "description": "PCI non-compliance fee", "amount": 39.95, "detail": "monthly"},
+    {"id": "L08", "description": "Regulatory & compliance fee", "amount": 29.95, "detail": "monthly"},
+    {"id": "L09", "description": "Customer Insights Suite", "amount": 24.95, "detail": "monthly"},
+    {"id": "L10", "description": "Monthly statement fee", "amount": 14.95, "detail": "monthly"},
+    {"id": "L11", "description": "Batch settlement fee", "amount": 7.75, "detail": "$0.25 x 31"},
+    {"id": "L12", "description": "Terminal lease - Keystone Lease Co.", "amount": 69.95, "detail": "month 17 of 48"}
+  ]
+}

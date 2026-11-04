@@ -1,0 +1,24 @@
+{
+  "_note": "Fictional merchant processing agreement.",
+  "illustrative": true,
+  "processor": "Keystone Merchant Services",
+  "signed": "2025-12-15",
+  "term_months": 36,
+  "months_remaining": 14,
+  "terms": {
+    "etf_flat": 495.00,
+    "liquidated_damages_pct": 0.5,
+    "lease_monthly": 69.95,
+    "lease_term_months": 48,
+    "lease_months_remaining": 31,
+    "lease_cancellable": false
+  },
+  "clauses": [
+    {"key": "auto_renew", "title": "Term & automatic renewal", "text": "This Agreement renews automatically for successive three (3) year terms unless Merchant provides written notice of non-renewal no fewer than 90 and no more than 120 days before the end of the then-current term."},
+    {"key": "liquidated_damages", "title": "Early termination - liquidated damages", "text": "If Merchant terminates before the end of the term, Merchant shall pay liquidated damages equal to fifty percent (50%) of Merchant's average monthly processing fees multiplied by the number of months remaining in the term, in addition to the Early Termination Fee."},
+    {"key": "etf", "title": "Early termination fee", "text": "An Early Termination Fee of $495.00 per location applies to any termination before the end of the term."},
+    {"key": "equipment_lease", "title": "Equipment lease", "text": "Terminal equipment is leased from Keystone Lease Co. under a separate 48-month non-cancellable lease at $69.95 per month. The lease survives termination of this Agreement and all remaining payments become immediately due."},
+    {"key": "pci_fee", "title": "PCI program", "text": "A PCI non-compliance fee of $39.95 per month will be assessed until Merchant validates compliance through the Processor's portal."},
+    {"key": "fee_changes", "title": "Fee changes", "text": "Processor may amend fees upon thirty (30) days' notice, which may be provided by message on Merchant's monthly statement. Continued processing constitutes acceptance."}
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "_note": "Deterministic redlines used in mock mode. dollars_at_risk is NOT stored here; src/agents/contract_exposer.py computes it from src/finance.",
+  "merchant_agreement": [
+    {"clause_key": "liquidated_damages", "severity": "high", "revised": "Merchant may terminate at any time on 30 days' written notice. No liquidated damages apply.", "why": "Half your average processor fees for every month left on the contract. This is the clause that traps owners into overpaying."},
+    {"clause_key": "auto_renew", "severity": "high", "revised": "After the initial term this Agreement continues month-to-month and either party may cancel on 30 days' notice.", "why": "Miss a 30-day window and you are locked in for three more years."},
+    {"clause_key": "equipment_lease", "severity": "high", "revised": "Merchant may return leased equipment and end the lease on 30 days' notice, or buy it out for $99.", "why": "48 months at $69.95 is $3,357.60 for a terminal that sells for about $300, and you can't cancel the lease."},
+    {"clause_key": "fee_changes", "severity": "high", "revised": "Fee increases require Merchant's written consent. Merchant may terminate without penalty within 60 days of any increase.", "why": "They can raise your fees with a line of small print on a statement."},
+    {"clause_key": "pci_fee", "severity": "medium", "revised": "Processor will help Merchant complete the PCI self-assessment (SAQ) within 30 days; no non-compliance fee will be charged.", "why": "You pay this every month until you fill out a free questionnaire."},
+    {"clause_key": "etf", "severity": "medium", "revised": "No early termination fee.", "why": "Competitors in this market offer month-to-month terms with no exit fee."}
+  ],
+  "mca_offer": [
+    {"clause_key": "purchase_price", "severity": "high", "revised": "Disclose the estimated APR (about 93%) and the total cost of financing ($15,200) before signing, as state disclosure rules require.", "why": "'1.35 factor' sounds like 35%. Because the money is paid back daily over about 9 months, the real annual cost is close to triple that."},
+    {"clause_key": "confession_of_judgment", "severity": "high", "revised": "Strike entirely. Disputes resolved by notice and a hearing.", "why": "Lets the funder get a court judgment against you without telling you first. Banned for out-of-state use in New York."},
+    {"clause_key": "blanket_lien", "severity": "high", "revised": "Security interest limited to the specific receivables purchased. No restriction on other financing.", "why": "Ties up every asset you own and blocks you from getting a cheaper SBA or bank loan to refinance."},
+    {"clause_key": "fixed_daily_debit", "severity": "medium", "revised": "Daily remittance is 6% of actual card sales, reconciled weekly at Merchant's request.", "why": "A fixed debit means on a slow Tuesday they still take $197.26. A true sales-based advance moves with your sales."},
+    {"clause_key": "origination", "severity": "medium", "revised": "No origination fee, or fee included in the disclosed finance charge.", "why": "You receive $38,800, not $40,000, but pay back as if you got the full amount."},
+    {"clause_key": "no_prepay_discount", "severity": "medium", "revised": "Early payoff receives a pro-rated discount of the unearned finance charge.", "why": "Paying early saves you nothing, so there is no way out of the cost."}
+  ]
+}

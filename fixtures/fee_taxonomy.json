@@ -1,0 +1,24 @@
+{
+  "source": "ShadowBuyer fee taxonomy, compiled from card-network and processor statement conventions",
+  "as_of": "2026-10",
+  "categories": {
+    "interchange": {"label": "Interchange", "negotiable": false, "who_gets_it": "card-issuing bank", "explain": "Set by Visa/Mastercard/Discover/Amex, the same for every processor. Pass-through at cost on an honest statement."},
+    "assessment": {"label": "Network assessments", "negotiable": false, "who_gets_it": "card networks", "explain": "Card-brand dues and network fees. Pass-through at cost."},
+    "processor_markup": {"label": "Processor markup", "negotiable": true, "who_gets_it": "your processor", "explain": "Discount rates, tier surcharges and per-transaction fees above cost. This is where the processor makes money and where negotiation happens."},
+    "junk_fee": {"label": "Junk fee", "negotiable": true, "who_gets_it": "your processor", "explain": "Fixed monthly add-ons (statement, 'regulatory', insights, batch, PCI non-compliance) that cost the processor little or nothing to provide."},
+    "equipment_lease": {"label": "Equipment lease", "negotiable": false, "who_gets_it": "a third-party leasing company", "explain": "Terminal leases are usually separate, non-cancellable contracts that cost far more than buying the terminal."}
+  },
+  "rules": [
+    {"match": ["interchange"], "category": "interchange"},
+    {"match": ["assessment", "network fee", "brand fee", "dues"], "category": "assessment"},
+    {"match": ["lease", "rental", "equipment"], "category": "equipment_lease"},
+    {"match": ["pci", "non-compliance", "noncompliance"], "category": "junk_fee", "tag": "PCI non-compliance", "reason": "Charged until you fill out a free 15-minute self-assessment questionnaire. Most processors will waive it once you do."},
+    {"match": ["regulatory", "compliance fee"], "category": "junk_fee", "tag": "Made-up 'regulatory' fee", "reason": "No regulator requires this. It is processor revenue with an official-sounding name."},
+    {"match": ["insights", "analytics", "loyalty", "suite"], "category": "junk_fee", "tag": "Unrequested add-on", "reason": "A software add-on the owner did not ask for and does not use."},
+    {"match": ["statement fee", "paper statement"], "category": "junk_fee", "tag": "Statement fee", "reason": "Charging to send you a bill. Routinely waived on request."},
+    {"match": ["batch", "settlement fee"], "category": "junk_fee", "tag": "Batch fee", "reason": "Fee to close out the day's sales. Usually waived on interchange-plus pricing."},
+    {"match": ["surcharge", "non-qualified", "mid-qualified", "nonqual"], "category": "processor_markup", "tag": "Tier surcharge", "reason": "Tiered pricing lets the processor decide which cards are 'non-qualified' and charge up to 1.65% extra on top of interchange."},
+    {"match": ["discount fee", "discount rate", "qualified"], "category": "processor_markup", "tag": "Discount markup", "reason": "Processor margin on top of interchange."},
+    {"match": ["authorization", "auth fee", "transaction fee", "per item"], "category": "processor_markup", "tag": "Per-swipe markup", "reason": "Per-transaction fee above the network cost. Fair benchmark is $0.05-$0.08."}
+  ]
+}

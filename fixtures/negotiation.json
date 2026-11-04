@@ -1,0 +1,103 @@
+{
+  "_note": "Processor Rep concession ladder (deterministic) and mock negotiation scripts. The rep's offers are terms; dollar figures are computed by src/finance. Mock text must agree with the ladder; tests/test_pipeline.py checks it.",
+  "rep": {
+    "name": "Dana Whitfield",
+    "title": "Merchant Retention, Keystone Merchant Services",
+    "email": "retention@keystone-merchant.example"
+  },
+  "ladder": {
+    "hardball": [
+      {
+        "label": "Rep: IC+ 0.65% + $0.10, waive 2 fees",
+        "model": "ic_plus",
+        "markup_pct": 0.0065,
+        "per_txn": 0.1,
+        "monthly_fees": {
+          "regulatory": 29.95,
+          "pci": 39.95,
+          "batch": 7.75
+        }
+      },
+      {
+        "label": "Rep: IC+ 0.40% + $0.10",
+        "model": "ic_plus",
+        "markup_pct": 0.004,
+        "per_txn": 0.1,
+        "monthly_fees": {
+          "pci": 39.95,
+          "batch": 7.75
+        }
+      },
+      {
+        "label": "Rep: IC+ 0.25% + $0.08, no monthly fees, exit clauses waived",
+        "model": "ic_plus",
+        "markup_pct": 0.0025,
+        "per_txn": 0.08,
+        "monthly_fees": {},
+        "concessions": [
+          "liquidated_damages",
+          "auto_renew",
+          "pci_fee",
+          "etf"
+        ]
+      }
+    ],
+    "diplomat": [
+      {
+        "label": "Rep: IC+ 0.70% + $0.10, waive 2 fees",
+        "model": "ic_plus",
+        "markup_pct": 0.007,
+        "per_txn": 0.1,
+        "monthly_fees": {
+          "regulatory": 29.95,
+          "pci": 39.95,
+          "batch": 7.75
+        }
+      },
+      {
+        "label": "Rep: IC+ 0.45% + $0.10",
+        "model": "ic_plus",
+        "markup_pct": 0.0045,
+        "per_txn": 0.1,
+        "monthly_fees": {
+          "batch": 7.75
+        }
+      },
+      {
+        "label": "Rep: IC+ 0.30% + $0.10, no monthly fees, 12-month price lock",
+        "model": "ic_plus",
+        "markup_pct": 0.003,
+        "per_txn": 0.1,
+        "monthly_fees": {},
+        "concessions": [
+          "pci_fee",
+          "price_lock_12mo"
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "hardball": [
+      "Maria is paying 3.28% all-in on $1.2M a year. Harbor Payments quoted interchange plus 0.20% and eight cents, month-to-month, free terminal. Your tier surcharges alone are $682 a month. Move her to interchange-plus today or we start the switch paperwork.",
+      "0.40% is still double the market. And let's talk about the 'regulatory' fee: no regulator charges it. Strip every monthly fee, get under 0.30%, and put it in writing.",
+      "Final ask: interchange plus 0.25% and eight cents, zero monthly fees, and you waive the liquidated damages and auto-renewal clauses. Yes by Friday, or she signs with Harbor and we file a complaint about the PCI fee practice."
+    ],
+    "diplomat": [
+      "Mario's has processed with Keystone since last December and never had a chargeback problem. Maria wants to stay, but her margins are 3%. Can you show her a price that lets her keep you?",
+      "That's real progress, thank you. She's opening a weekend brunch service in spring, so that's more volume for you. If you can drop the batch fee and come down a little more, I think we can lock this in.",
+      "Interchange plus 0.30% and ten cents with no monthly fees and a 12-month price lock works for her. Can you confirm in writing and help her complete the PCI questionnaire this week?"
+    ],
+    "rep_hardball": [
+      "I hear you. I can move Mario's to interchange plus 0.65% and ten cents and waive the Customer Insights and statement fees. That's a significant improvement.",
+      "Okay. Interchange plus 0.40% and ten cents, and I'll drop the regulatory fee and statement fee. PCI stays until she validates.",
+      "Fine. Interchange plus 0.25% and eight cents, no monthly fees, and I'll get the liquidated damages and auto-renewal clauses waived in an amendment. I can't match Harbor's ten-dollar account fee structure, but I can do this."
+    ],
+    "rep_diplomat": [
+      "We appreciate Maria's business. I can offer interchange plus 0.70% and ten cents and remove the Customer Insights and statement fees.",
+      "For a loyal account, interchange plus 0.45% and ten cents. I'll remove everything except the batch fee.",
+      "Interchange plus 0.30% and ten cents, no monthly fees, with a 12-month price lock. I'll send the SAQ link today."
+    ]
+  },
+  "referee_rationale": "Hardball wins. The Harbor quote gave us real leverage, and the rep went to {hardball_label} with the exit traps waived. That's {hardball_annual}/yr with no switching costs. Switching to Harbor looked best on paper ({switch_annual}/yr), but the liquidated damages, ETF and lease buyout would cost {switch_one_time} up front, leaving Maria {switch_net_abs} {switch_net_word} after a year. Diplomat's deal is solid but leaves {hb_minus_dp}/yr on the table.",
+  "referee_reasoning_summary": "Compared four paths on first-year net dollars from the calculator: stay as-is, Hardball deal, Diplomat deal, switch to Harbor. Switching only looks good before exit costs. Hardball beats Diplomat and also removes the liquidated-damages and auto-renew clauses, so Maria can walk next year if pricing creeps. Diplomat's 12-month lock is weaker than a consent requirement on fee changes."
+}
