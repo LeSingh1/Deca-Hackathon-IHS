@@ -27,7 +27,7 @@ The product, customer, money math, agents, UI and integrations are new:
 | Agents | Statement Reader (vision), Fee Hunter, Rate Scout, Hardball / Diplomat vs. a simulated Processor Rep, Referee, Contract Exposer, Action Drafter: all new code |
 | LLM layer | `src/llm/`: provider-agnostic client on the Anthropic SDK (structured outputs, streaming, prompt caching, adaptive thinking summaries, per-agent cost), the models file, and the number guard. TokenRouter/Qwen/GLM removed. |
 | Execution | Approval gate, run manager, Stripe test-mode savings sweep, dry-run rep email, fee receipt, savings ledger |
-| Owner channel | Twilio SMS webhook and phone-frame simulator driving the same handler |
+| Owner channel | Twilio SMS webhook and a built-in text simulator driving the same handler |
 | Report | Server-side lender/accountant-ready PDF (reportlab) with the MCA paydown chart |
 | Fixtures | Fictional statement (JSON + PDF), fee taxonomy, benchmarks, competitor quotes, MCA offer, merchant agreement, redlines, negotiation ladder |
 | Frontend | New Vite + React 19 + Motion app: every screen and all state logic are new code for this product (see below for the styling that carried over) |
