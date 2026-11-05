@@ -141,7 +141,7 @@ def build_report(state: dict[str, Any], run_id: str) -> bytes:
         rows.append([li["id"], Paragraph(li["description"], CELL), Paragraph(li.get("detail") or "", CELL),
                      Paragraph(CATEGORY_LABEL.get(li["category"], li["category"]), CELL), m(li["amount"])])
     rows.append(["", "Total fees", "", f"effective rate {pct(b.current_rate)}", m(b.current_cost)])
-    s.append(_table(rows, [0.45 * inch, 2.1 * inch, 1.35 * inch, 1.6 * inch, 0.9 * inch], money_cols=(4,), bold_last=True))
+    s.append(_table(rows, [0.4 * inch, 2.0 * inch, 1.95 * inch, 1.7 * inch, 0.95 * inch], money_cols=(4,), bold_last=True))
     bd = state["breakdown"]
     s.append(Spacer(1, 4))
     s.append(Paragraph(
@@ -203,8 +203,9 @@ def build_report(state: dict[str, Any], run_id: str) -> bytes:
             rows.append([a["action"].replace("_", " "), a["provider"] + (" (sandbox)" if a["sandbox"] else ""),
                          a["ref"], m(a["amount"]), Paragraph(status, CELL)])
         s.append(_table(rows, [1.1 * inch, 1.3 * inch, 1.9 * inch, 0.8 * inch, 1.9 * inch], money_cols=(3,)))
-        s.append(Paragraph("Sandbox: rep email is a dry run; the savings sweep is a Stripe test-mode payment "
-                           "(production rail: FedNow instant payment to the owner's reserve account).", SMALL))
+        s.append(Paragraph("Sandbox: rep email is a dry run; the savings sweep moved no real money: a Stripe test-mode "
+                           "payment when a test key is set, otherwise a labeled mock (production rail: FedNow "
+                           "instant payment to the owner's reserve account).", SMALL))
     else:
         s.append(Paragraph("No actions taken: the owner did not approve.", BODY))
 

@@ -77,6 +77,14 @@ def run(ctx: RunContext) -> Iterator[dict]:
     t0 = time.monotonic()
     yield _stage("statement_reader", "Reading the statement photo", "statement_reader", llm)
     statement, parsed_live = statement_reader.read(ctx.media, llm)
+    if not parsed_live and any(m.startswith("file:") for m in ctx.media):
+        # A real owner sent this. Never answer with the fictional fixture's numbers.
+        yield from ctx.drain_costs()
+        yield _done("statement_reader", t0, "could not read the upload")
+        yield owner_say("Sorry, I couldn't read that statement, so I haven't changed anything. Try a clear, flat "
+                        "photo of the whole page, or text DEMO to see a sample run.", ctx)
+        yield {"event": "done", "ok": False}
+        return
     st["statement"] = statement
     items = statement["line_items"]
     for i, li in enumerate(items):
@@ -122,7 +130,7 @@ def run(ctx: RunContext) -> Iterator[dict]:
     yield _stage("negotiator", label, "negotiator_swarm", llm,
                  agents=("hardball", "diplomat", "processor_rep", "referee"))
     neg: dict[str, Any] = {}
-    yield from negotiator.stream(statement, b, llm, neg)
+    yield from negotiator.stream(statement, b, llm, neg, prior)
     yield from ctx.drain_costs()
     verdict = referee.judge(b, neg["final"], neg["transcripts"], llm)
     st["negotiation"], st["verdict"] = neg, verdict
@@ -172,7 +180,7 @@ def run(ctx: RunContext) -> Iterator[dict]:
     yield _stage("approval", "Waiting for the owner's YES", "owner", llm)
     yield {"event": "approval_requested", "approval_id": approval_id,
            "actions": ["Email the accepted offer to the processor rep (dry run)",
-                       f"Move {action_drafter.money(monthly, True)} to {actions.RESERVE_LABEL} (Stripe test mode)"],
+                       f"Move {action_drafter.money(monthly, True)} to {actions.RESERVE_LABEL} ({actions.sweep_rail()})"],
            "prompt": "Reply YES to lock it in, or NO to stop."}
     approval = ctx.wait_for_approval(approval_id)
     approved = bool(approval and approval.approved)
@@ -202,7 +210,7 @@ def run(ctx: RunContext) -> Iterator[dict]:
         yield _done("executor", t0)
         yield owner_say(
             f"Done. Rep email drafted (dry run) and {action_drafter.money(monthly, True)} moved to your "
-            f"{actions.RESERVE_LABEL} (Stripe test mode). Your lender-ready report: tap to download.", ctx)
+            f"{actions.RESERVE_LABEL} ({actions.sweep_rail()}). Your lender-ready report: tap to download.", ctx)
     else:
         yield owner_say("No problem. Nothing was sent and no money moved.", ctx)
     st["executed"] = executed

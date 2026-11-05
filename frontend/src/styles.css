@@ -93,7 +93,7 @@ button, input { font: inherit; color: inherit; }
   position: sticky; top: 0; z-index: 20;
   display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
   padding: 12px 24px;
-  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  background: var(--paper);
   border-bottom: 1px solid var(--rule);
 }
 .brand { display: flex; align-items: baseline; gap: 10px; margin-right: auto; }

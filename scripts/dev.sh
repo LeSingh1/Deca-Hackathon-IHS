@@ -1,7 +1,10 @@
 #!/usr/bin/env sh
-# Local dev: build the UI once, then serve UI + API on http://localhost:8000
+# Local dev, one command: makes .venv on first run, loads .env if present,
+# builds the UI, then serves UI + API on http://localhost:8000
 set -e
 cd "$(dirname "$0")/.."
-pip install -q -r requirements-dev.txt
+[ -d .venv ] || python3 -m venv .venv
+.venv/bin/python -m pip install -q --disable-pip-version-check -r requirements-dev.txt
 (cd frontend && npm install --no-audit --no-fund && npm run build)
-exec python -m uvicorn src.app:app --reload --port 8000
+if [ -f .env ]; then set -a; . ./.env; set +a; fi
+exec .venv/bin/python -m uvicorn src.app:app --reload --reload-dir src --port 8000

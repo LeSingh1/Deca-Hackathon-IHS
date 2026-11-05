@@ -13,18 +13,28 @@ export async function getServices(): Promise<Record<string, string>> {
 }
 
 export async function startDemo(pace: Pace): Promise<string | null> {
-  const r = await fetch(`/api/demo/start?pace=${pace}`, { method: "POST" });
-  if (!r.ok) return null;
-  const j = (await r.json()) as { run_id: string | null };
-  return j.run_id;
+  try {
+    const r = await fetch(`/api/demo/start?pace=${pace}`, { method: "POST" });
+    if (!r.ok) return null;
+    const j = (await r.json()) as { run_id: string | null };
+    return j.run_id;
+  } catch {
+    return null;
+  }
 }
 
-export async function sendSms(body: string): Promise<void> {
-  await fetch("/api/sms/inbound", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ from: DEMO_PHONE, body }),
-  });
+/** Replies carry the run id: everyone on a shared demo has the same phone number. */
+export async function sendSms(body: string, runId: string | null): Promise<boolean> {
+  try {
+    const r = await fetch("/api/sms/inbound", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ from: DEMO_PHONE, body, run_id: runId }),
+    });
+    return r.ok;
+  } catch {
+    return false;
+  }
 }
 
 /** Subscribe to a run's SSE stream. Returns an unsubscribe function. */

@@ -42,11 +42,18 @@ class Inbound(BaseModel):
     body: str = ""
     media: list[str] = Field(default_factory=list)
     pace: str = "presenter"
+    run_id: str | None = None     # the run this simulator is watching; shared demos share one phone number
+
+
+def _non_negative_int(value: object) -> int:
+    """Untrusted numeric input: anything that isn't a plain non-negative integer counts as 0."""
+    text = str(value) if value is not None else ""
+    return int(text) if text.isdigit() else 0
 
 
 def handle_inbound(phone: str, body: str, media: list[str], pace: str, channel: str) -> dict[str, Any]:
     """One handler for both the simulator and Twilio."""
-    pending = runs.latest_awaiting(phone)
+    pending = runs.latest_awaiting(phone, channel)
     if pending and not media:
         pending.receive_reply(body)
         return {"run_id": pending.id, "kind": "reply", "replies": []}
@@ -71,6 +78,16 @@ def api_services() -> dict[str, str]:
 
 @app.post("/api/sms/inbound")
 def sms_inbound(msg: Inbound) -> dict[str, Any]:
+    # The simulator is unauthenticated: it may only use the demo fixture (never a server
+    # path) and may only answer simulator runs (never a real owner's approval).
+    if any(m != FIXTURE_MEDIA for m in msg.media):
+        raise HTTPException(400, "the simulator only accepts the demo statement")
+    if msg.run_id is not None:
+        run = runs.get(msg.run_id)
+        if not run or run.channel != "simulator":
+            raise HTTPException(404, "unknown run")
+        run.receive_reply(msg.body)
+        return {"run_id": run.id, "kind": "reply", "replies": []}
     return handle_inbound(msg.from_, msg.body, msg.media, msg.pace, "simulator")
 
 
@@ -83,9 +100,15 @@ def demo_start(pace: str = "presenter") -> dict[str, Any]:
 @app.post("/sms/twilio")
 async def sms_twilio(request: Request) -> Response:
     form = await request.form()
+    # A valid signature proves Twilio sent this, so a forged "YES" can't approve anything.
+    if twilio.mode() == "live":
+        params = {k: str(v) for k, v in form.items()}
+        if not twilio.valid_signature(twilio.webhook_url(str(request.url)), params,
+                                      request.headers.get("x-twilio-signature", "")):
+            raise HTTPException(403, "invalid Twilio signature")
     phone, body = str(form.get("From", "")), str(form.get("Body", ""))
     media = []
-    for i in range(int(form.get("NumMedia", 0) or 0)):
+    for i in range(_non_negative_int(form.get("NumMedia"))):
         m = twilio.download_media(str(form.get(f"MediaUrl{i}")), str(form.get(f"MediaContentType{i}") or ""))
         if m:
             media.append(m)
@@ -109,7 +132,7 @@ def run_events(run_id: str, request: Request) -> StreamingResponse:
         raise HTTPException(404, "unknown run")
     # EventSource reconnects send Last-Event-ID; resume right after it (no duplicates).
     last = request.headers.get("last-event-id")
-    start = int(last) + 1 if last and last.isdigit() else int(request.query_params.get("from", 0))
+    start = int(last) + 1 if last and last.isdigit() else _non_negative_int(request.query_params.get("from"))
 
     def gen():
         for ev in run.subscribe(start):
@@ -134,10 +157,18 @@ def run_report(run_id: str) -> Response:
 
 
 _DIST = Path(__file__).resolve().parents[1] / "frontend" / "dist"
-if _DIST.exists():
-    app.mount("/assets", StaticFiles(directory=_DIST / "assets"), name="assets")
 
-    @app.get("/{path:path}", include_in_schema=False)
+
+def mount_ui(target: FastAPI, dist: Path) -> None:
+    """Serve the built frontend from `dist`, falling back to index.html for SPA routes."""
+    target.mount("/assets", StaticFiles(directory=dist / "assets"), name="assets")
+
+    @target.get("/{path:path}", include_in_schema=False)
     def spa(path: str) -> FileResponse:
-        f = _DIST / path
-        return FileResponse(f if path and f.is_file() else _DIST / "index.html")
+        root = dist.resolve()
+        f = (root / path).resolve()     # the route decodes %2f, so `path` may contain ../
+        return FileResponse(f if path and f.is_relative_to(root) and f.is_file() else root / "index.html")
+
+
+if _DIST.exists():
+    mount_ui(app, _DIST)

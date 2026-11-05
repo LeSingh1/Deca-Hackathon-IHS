@@ -37,7 +37,7 @@ function readTheme(): Theme {
 function Intro({ onStart }: { onStart: () => void }) {
   return (
     <section className="panel intro">
-      <h1>Card fees are a restaurant&apos;s second-biggest bill after labor.</h1>
+      <h1>Card fees can cost a restaurant as much as it keeps in profit.</h1>
       <p>
         An independent restaurant doing $1.2M a year on cards runs on 3-4% margins and loses 2-3% of every swipe to
         processing. The worst of it hides in tier surcharges, junk fees and contracts nobody reads, and the
@@ -105,6 +105,16 @@ export default function App() {
     unsub.current = subscribe(runId, (ev) => dispatch({ type: "event", ev }));
   }, [pace]);
 
+  const send = useCallback(
+    (body: string) => {
+      dispatch({ type: "notice", message: null });
+      void sendSms(body, s.runId).then((ok) => {
+        if (!ok) dispatch({ type: "notice", message: "That text didn't send. Check the connection and try again." });
+      });
+    },
+    [s.runId],
+  );
+
   const restart = useCallback(() => {
     unsub.current?.();
     dispatch({ type: "reset", services: s.services });
@@ -127,7 +137,7 @@ export default function App() {
       />
       <main className="stage">
         <div className="phone-col">
-          <Phone state={s} onSend={(b) => void sendSms(b)} onStart={start} />
+          <Phone state={s} onSend={send} onStart={start} />
         </div>
         <div className="cc" aria-label="Swarm command center">
           {idle ? (

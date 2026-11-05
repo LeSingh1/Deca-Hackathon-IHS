@@ -58,11 +58,21 @@ def _facts(statement: dict, b: Baseline) -> str:
     )
 
 
-def stream(statement: dict, b: Baseline, llm: LLM, result: dict[str, Any]) -> Iterator[dict]:
+def _memory_line(prior: dict) -> str:
+    return f"Last time we settled with you at {prior['final_rate'] * 100:.2f}% all-in, so let's start from there."
+
+
+def stream(statement: dict, b: Baseline, llm: LLM, result: dict[str, Any],
+           prior: dict | None = None) -> Iterator[dict]:
     """Yield negotiation_turn event dicts. Fills result['final'][lane] with the
-    priced final offer and result['transcripts'][lane] with the full text."""
+    priced final offer and result['transcripts'][lane] with the full text.
+
+    `prior` is what won last run (from memory). It shapes how the winning lane
+    opens; the offers still come from the ladder, so the money can't change."""
     neg = fixtures.load("negotiation")
     facts = _facts(statement, b)
+    if prior:
+        facts += f" Memory: the {prior['winner']} approach won the last run at {prior['final_rate'] * 100:.2f}% all-in."
     ctx = fixtures.shared_context()
     transcripts: dict[str, list[dict]] = {lane: [] for lane in LANES}
     final: dict[str, dict] = {}
@@ -79,7 +89,10 @@ def stream(statement: dict, b: Baseline, llm: LLM, result: dict[str, Any]) -> It
             got = True
             yield chunk
         if not got:
-            yield from _words(neg["scripts"][lane][rnd - 1])
+            script = neg["scripts"][lane][rnd - 1]
+            if prior and rnd == 1 and prior["winner"] == lane:
+                script = f"{_memory_line(prior)} {script}"
+            yield from _words(script)
 
     def rep_turn(lane: str, rnd: int, step: dict) -> Iterator[str]:
         last = transcripts[lane][-1]["text"] if transcripts[lane] else ""

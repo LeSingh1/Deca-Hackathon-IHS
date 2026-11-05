@@ -10,6 +10,7 @@ Pacing (seconds slept AFTER each event):
 from __future__ import annotations
 
 import os
+import re
 import threading
 import time
 import uuid
@@ -29,7 +30,35 @@ PRESENTER_DELAY = {
 }
 TURN_DONE_DELAY = 0.9          # extra pause when a negotiation turn completes
 PACE_FACTOR = {"presenter": 0.9, "fast": 0.12, "instant": 0.0}
-YES = {"YES", "Y", "YEP", "YEAH", "OK", "OKAY", "SI", "DO IT", "APPROVE", "LOCK IT IN"}
+YES_WORDS = {"YES", "Y", "YEP", "YEAH", "YUP", "OK", "OKAY", "SI", "SURE", "APPROVE", "APPROVED", "CONFIRM", "ACCEPT"}
+YES_PHRASES = ("DO IT", "LOCK IT IN", "GO AHEAD", "SOUNDS GOOD")
+NO_WORDS = {"NO", "N", "NOPE", "NAH", "STOP", "CANCEL", "DECLINE", "REJECT"}
+REFUSALS = ("DONT", "DO NOT")
+HEDGES = {"BUT", "WAIT", "NOT", "HOLD", "UNLESS", "MAYBE", "IF", "LATER", "WHAT", "WHY", "HOW", "WHO", "WHEN"}
+UNCLEAR_REPLY = "Nothing has moved yet. Reply YES to lock it in, or NO to stop."
+
+
+def parse_reply(body: str) -> bool | None:
+    """True = approved, False = declined, None = unclear (ask again).
+
+    Money moves on this answer, so approval needs a reply that opens with a clear
+    yes and hedges nothing. Anything doubtful keeps the gate closed and asks again.
+    """
+    if "?" in body:
+        return None
+    text = " ".join(re.sub(r"[^A-Z ]", " ", re.sub(r"['’]", "", body.upper())).split())
+    words = text.split()
+    if not words:
+        return None
+    if text.startswith(REFUSALS):
+        return False
+    if HEDGES & set(words):
+        return None
+    says_no = bool(NO_WORDS & set(words))
+    says_yes = words[0] in YES_WORDS or text.startswith(YES_PHRASES)
+    if says_yes == says_no:
+        return None
+    return says_yes
 
 
 def delay_for(ev: dict, pace: str) -> float:
@@ -55,6 +84,7 @@ class Run:
     finished: bool = False
     state: dict[str, Any] = field(default_factory=dict)
     auto_approve: str | None = None      # "YES"/"NO" for tests and batch runs
+    _reply_lock: threading.Lock = field(default_factory=threading.Lock)
 
     def emit(self, ev: dict) -> dict:
         with self.cond:
@@ -76,16 +106,25 @@ class Run:
         return self.approval
 
     def receive_reply(self, body: str, emit_message: bool = True) -> bool:
-        """Resolve the approval gate. Returns False if nothing is awaiting."""
-        if self.awaiting is None:
-            return False
-        if emit_message:
-            self.emit({"event": "owner_message", "direction": "in", "body": body, "media": [],
-                       "channel": self.channel})
-        approved = body.strip().upper().rstrip("!.") in YES
-        self.approval = Approval(self.awaiting, approved, body)
-        self.approval_flag.set()
-        return True
+        """Answer the approval gate. Returns False if nothing is awaiting.
+
+        A clear yes or no is final; an unclear reply is answered and the gate stays open.
+        """
+        with self._reply_lock:
+            if self.awaiting is None:
+                return False
+            if emit_message:
+                self.emit({"event": "owner_message", "direction": "in", "body": body, "media": [],
+                           "channel": self.channel})
+            decision = parse_reply(body)
+            if decision is None:
+                self.emit({"event": "owner_message", "direction": "out", "body": UNCLEAR_REPLY, "media": [],
+                           "channel": self.channel})
+                return True
+            self.approval = Approval(self.awaiting, decision, body)
+            self.awaiting = None
+            self.approval_flag.set()
+            return True
 
     def subscribe(self, from_seq: int = 0, heartbeat_s: float = 15.0) -> Iterator[dict | None]:
         """Replay then tail. Yields None as a heartbeat when idle."""
@@ -114,9 +153,9 @@ class RunManager:
     def get(self, run_id: str) -> Run | None:
         return self._runs.get(run_id)
 
-    def latest_awaiting(self, phone: str) -> Run | None:
+    def latest_awaiting(self, phone: str, channel: str) -> Run | None:
         with self._lock:
-            runs = [r for r in self._runs.values() if r.phone == phone and r.awaiting]
+            runs = [r for r in self._runs.values() if r.phone == phone and r.channel == channel and r.awaiting]
         return runs[-1] if runs else None
 
     def start(self, *, phone: str, media: list[str], body: str = "", pace: str = "presenter",
@@ -135,10 +174,12 @@ class RunManager:
         from .health import services
         ctx = pipeline.RunContext(run_id=run.id, phone=run.phone, media=run.media,
                                   wait_for_approval=run.wait_for_approval, channel=run.channel, state=run.state)
+        demo = all(m.startswith("fixture:") for m in run.media)
+        owner = {"phone": run.phone, "name": "Maria Russo" if demo else "",
+                 "business": "Mario's Trattoria" if demo else ""}
         try:
             first = [
-                {"event": "run_started", "pace": run.pace, "services": services(),
-                 "owner": {"phone": run.phone, "name": "Maria Russo", "business": "Mario's Trattoria"}},
+                {"event": "run_started", "pace": run.pace, "services": services(), "owner": owner},
                 {"event": "owner_message", "direction": "in", "body": body or "Here's my card statement",
                  "media": run.media, "channel": run.channel},
             ]

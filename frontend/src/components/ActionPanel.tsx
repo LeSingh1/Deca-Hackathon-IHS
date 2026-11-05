@@ -87,7 +87,7 @@ export function ActionPanel({ s }: { s: RunState }) {
         <div>
           <h3 style={{ margin: "0 0 8px", fontSize: 15 }}>After YES</h3>
           {s.actions.length === 0 ? (
-            <p className="hint">Stripe test-mode sweep, fee receipt, and the dry-run email run only after the approval event.</p>
+            <p className="hint">The savings sweep, fee receipt, and dry-run email run only after the approval event.</p>
           ) : (
             <div>
               {s.actions.map((a) => (
@@ -130,7 +130,7 @@ export function ActionPanel({ s }: { s: RunState }) {
         >
           Download lender-ready PDF
         </a>
-        <span className="hint">Stripe test mode, no real money. In production the sweep rides FedNow instant payments.</span>
+        <span className="hint">Sandbox, no real money: Stripe test mode with a key, a labeled mock without one. In production the sweep rides FedNow instant payments.</span>
       </div>
     </Panel>
   );

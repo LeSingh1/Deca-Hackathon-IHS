@@ -108,6 +108,7 @@ export type Action =
   | { type: "reset"; services: Record<string, string> }
   | { type: "starting" }
   | { type: "services"; services: Record<string, string> }
+  | { type: "notice"; message: string | null }
   | { type: "event"; ev: SwarmEvent };
 
 export function reducer(s: RunState, a: Action): RunState {
@@ -118,6 +119,8 @@ export function reducer(s: RunState, a: Action): RunState {
       return { ...initialState(s.services), status: "starting" };
     case "services":
       return { ...s, services: a.services };
+    case "notice":
+      return { ...s, error: a.message };
     case "event":
       return applyEvent(s, a.ev);
   }

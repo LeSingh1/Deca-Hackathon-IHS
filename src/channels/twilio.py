@@ -13,6 +13,8 @@ the same messages from the same event stream.
 from __future__ import annotations
 
 import base64
+import hashlib
+import hmac
 import mimetypes
 import os
 import tempfile
@@ -26,6 +28,19 @@ def mode() -> str:
 def _auth() -> str:
     raw = f"{os.environ['TWILIO_ACCOUNT_SID']}:{os.environ['TWILIO_AUTH_TOKEN']}".encode()
     return "Basic " + base64.b64encode(raw).decode()
+
+
+def webhook_url(request_url: str) -> str:
+    """The URL Twilio signed. Behind a proxy the app can't see it, so set SHADOWBUYER_PUBLIC_URL."""
+    base = os.getenv("SHADOWBUYER_PUBLIC_URL", "").rstrip("/")
+    return f"{base}/sms/twilio" if base else request_url
+
+
+def valid_signature(url: str, params: dict[str, str], signature: str) -> bool:
+    """Twilio's request validation: base64(HMAC-SHA1(token, url + sorted key+value pairs))."""
+    data = url + "".join(k + params[k] for k in sorted(params))
+    digest = hmac.new(os.environ["TWILIO_AUTH_TOKEN"].encode(), data.encode(), hashlib.sha1).digest()
+    return hmac.compare_digest(base64.b64encode(digest).decode(), signature)
 
 
 def send_sms(to: str, body: str) -> bool:

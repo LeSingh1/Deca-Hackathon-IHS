@@ -40,6 +40,11 @@ def stripe_mode() -> str:
     return "live" if key.startswith(("sk_test_", "rk_test_")) else "mock"
 
 
+def sweep_rail() -> str:
+    """How the sweep actually runs right now, for anything shown to the owner."""
+    return "Stripe test mode" if stripe_mode() == "live" else "sandbox, no real money"
+
+
 def _require(approval: Approval | None, action: str) -> None:
     if approval is None or not approval.approved:
         raise ApprovalRequired(f"refusing to run {action!r} without an owner approval event")
@@ -60,7 +65,7 @@ def savings_sweep(approval: Approval | None, amount: float, run_id: str, merchan
     _require(approval, "savings_sweep")
     cents = int(round(amount * 100))
     detail = {"to": RESERVE_LABEL, "merchant": merchant, "rail_in_production": "FedNow instant payment",
-              "note": "Stripe test mode: no real money moved"}
+              "note": f"{sweep_rail()}: no real money moved"}
     if stripe_mode() == "live":
         try:
             import stripe
