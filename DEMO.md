@@ -1,12 +1,14 @@
 # 3-minute demo script
 
+**Recorded version:** [demo/shadowbuyer-demo.mp4](demo/shadowbuyer-demo.mp4).
+
 **Setup:** open the app at 1080p, **Presenter ~75s** selected, light ("Paper") theme. Phone on the left, command center on the right. The backup recording is the same run in Fast mode.
 
 ---
 
 ### 0:00–0:20 · The money being lost
 
-> "This is Maria. She owns Mario's Trattoria in Brooklyn and does about $1.2 million a year on cards, at a 3 to 4 percent margin. After labor, her second-biggest bill is the 2 to 3 percent she pays on every swipe. And this week a lender texted her a '$40,000 in 24 hours, simple 1.35 factor' offer."
+> "This is Maria. She owns Mario's Trattoria in Brooklyn and does about $1.2 million a year on cards, at a 3 to 4 percent margin. The 2 to 3 percent she pays on every swipe is about as much as she keeps in profit. And this week a lender texted her a '$40,000 in 24 hours, simple 1.35 factor' offer."
 
 > "She doesn't need another dashboard. She needs someone to fight for her, over text."
 
@@ -58,11 +60,13 @@ Point at the phone. The 3-line summary has arrived:
 
 > "Nothing leaves the building until she says so."
 
+Optional: type a question like "what does this mean?" first. It isn't treated as a yes or a no; ShadowBuyer re-asks and the deal stays open.
+
 Tap **YES** on the phone.
 
-Point at **Your YES, and the money moves**: the receipts ($48.20 ticket: **$1.58 → $1.20**), the coin moving **Processor fees → Back in your pocket → Tax & Rainy-Day reserve**, and the **$787.83** Stripe test-mode sweep.
+Point at **Your YES, and the money moves**: the receipts ($48.20 ticket: **$1.58 → $1.20**), the coin moving **Processor fees → Back in your pocket → Tax & Rainy-Day reserve**, and the **$787.83** sandbox sweep.
 
-> "Month one's savings, $787.83, sweeps into her rainy-day reserve. That's Stripe test mode today and FedNow instant payments in production. And she gets this."
+> "Month one's savings, $787.83, sweeps into her rainy-day reserve. It's sandboxed today, Stripe test mode with a key and a labeled mock without one, with FedNow instant payments as the production rail. And she gets this."
 
 Click **Download lender-ready PDF**.
 

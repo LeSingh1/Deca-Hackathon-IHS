@@ -31,11 +31,11 @@ The product, customer, money math, agents, UI and integrations are new:
 | Report | Server-side lender/accountant-ready PDF (reportlab) with the MCA paydown chart |
 | Fixtures | Fictional statement (JSON + PDF), fee taxonomy, benchmarks, competitor quotes, MCA offer, merchant agreement, redlines, negotiation ladder |
 | Frontend | New Vite + React 19 + Motion app: two-screen layout, new visual design, all animations |
-| Tests | 45 tests: calculators, contract drift, end-to-end mock run, approval gate, live-model routing, API |
+| Tests | 85 tests: calculators, contract drift, end-to-end mock run, approval gate, live-model routing, API, and hardening (path traversal, forged approvals, reply parsing, malformed input) |
 
 ## What carried over as ideas (not code)
 
 - The **swarm shape**: a Hardball and a Diplomat negotiator compete and a Referee picks.
 - The **mock-fallback contract**: zero keys = deterministic demo; any live failure degrades to fixtures.
 - The **paced SSE generator** pattern and live/mock status chips (formerly `/api/sponsor-health`).
-- The idea of **persisting run outcomes** so the next run starts smarter. `src/memory/store.py` is new: a plain local JSON store (no Evermind) with namespaces for owner profiles, statements, decisions and tactics.
+- The idea of **persisting run outcomes** so the next run starts smarter. `src/memory/store.py` is new: a plain local JSON store (no Evermind) with namespaces for owner profiles, statements, decisions and tactics. The winning negotiator opens its next run from what worked.
