@@ -105,7 +105,8 @@ def judge(b: Baseline, final: dict[str, dict], transcripts: dict, llm: LLM) -> d
         )
         table = "\n".join(
             f"- {o['key']}: {o['label']} | rate {o['effective_rate'] * 100:.2f}% | annual savings ${o['annual_savings']:,.2f} "
-            f"| one-time ${o['one_time_costs']:,.2f} | first-year net ${o['net_first_year']:,.2f}" for o in opts
+            f"| one-time ${o['one_time_costs']:,.2f} | first-year net {'-' if o['net_first_year'] < 0 else ''}${abs(o['net_first_year']):,.2f}"
+            for o in opts
         )
         res = llm.structured(
             "referee", shared_context=fixtures.shared_context(), schema=RefereeOut,

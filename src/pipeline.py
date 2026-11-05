@@ -222,7 +222,7 @@ def run(ctx: RunContext) -> Iterator[dict]:
         yield _done("executor", t0)
         yield owner_say(
             f"Done. Rep email drafted (dry run) and {action_drafter.money(monthly, True)} moved to your "
-            f"{actions.RESERVE_LABEL} ({actions.sweep_rail()}). Your lender-ready report: tap to download.", ctx)
+            f"{actions.RESERVE_LABEL} ({actions.rail_used(executed[-1])}). Your lender-ready report: tap to download.", ctx)
     else:
         yield owner_say("No problem. Nothing was sent and no money moved.", ctx)
     st["executed"] = executed

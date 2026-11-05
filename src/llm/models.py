@@ -31,7 +31,7 @@ class AgentModel:
     provider: str = "anthropic"
     effort: str | None = None          # output_config.effort; None = model default
     show_thinking_summary: bool = False  # adaptive thinking, display="summarized"
-    max_tokens: int = 4000
+    max_tokens: int = 4000             # includes thinking, which is on by default on these models
 
 
 AGENTS: dict[str, AgentModel] = {
@@ -39,9 +39,9 @@ AGENTS: dict[str, AgentModel] = {
     for a in [
         AgentModel("statement_reader", SONNET, "Vision-parse statement photo/PDF into line items", effort="medium", max_tokens=8000),
         AgentModel("fee_hunter", HAIKU, "Classify every line (interchange, markup, junk, PCI...)", effort="low", max_tokens=4000),
-        AgentModel("hardball", SONNET, "Aggressive rate-cut ask citing competitor quotes", effort="low", max_tokens=600),
-        AgentModel("diplomat", SONNET, "Relationship-preserving retention ask", effort="low", max_tokens=600),
-        AgentModel("processor_rep", HAIKU, "Simulated processor sales rep who pushes back", effort="low", max_tokens=500),
+        AgentModel("hardball", SONNET, "Aggressive rate-cut ask citing competitor quotes", effort="low", max_tokens=4000),
+        AgentModel("diplomat", SONNET, "Relationship-preserving retention ask", effort="low", max_tokens=4000),
+        AgentModel("processor_rep", HAIKU, "Simulated processor sales rep who pushes back", effort="low", max_tokens=4000),
         AgentModel("referee", OPUS, "Judge transcripts, explain the winning strategy", effort="high", show_thinking_summary=True, max_tokens=8000),
         AgentModel("contract_exposer", OPUS, "Find traps in MCA offer + merchant agreement; write redlines", effort="high", show_thinking_summary=True, max_tokens=16000),
         AgentModel("action_drafter", SONNET, "Write the rep email and switch checklist", effort="low", max_tokens=2000),

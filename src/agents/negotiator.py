@@ -33,6 +33,10 @@ _AGENT_BRIEF = {
 }
 
 
+# Whatever a negotiator writes goes straight on screen and into the other side's next turn.
+_ONLY_THE_MESSAGE = " Write only your message to the other side: no commentary on your choices, no notes to anyone else."
+
+
 def _words(text: str, n: int = 3) -> Iterator[str]:
     w = text.split(" ")
     for i in range(0, len(w), n):
@@ -59,7 +63,7 @@ def _facts(statement: dict, b: Baseline) -> str:
 
 
 def _memory_line(prior: dict) -> str:
-    return f"Last time we settled with you at {prior['final_rate'] * 100:.2f}% all-in, so let's start from there."
+    return f"Last time you offered us {prior['final_rate'] * 100:.2f}% all-in, so let's start from there."
 
 
 def stream(statement: dict, b: Baseline, llm: LLM, result: dict[str, Any],
@@ -72,16 +76,21 @@ def stream(statement: dict, b: Baseline, llm: LLM, result: dict[str, Any],
     neg = fixtures.load("negotiation")
     facts = _facts(statement, b)
     if prior:
-        facts += f" Memory: the {prior['winner']} approach won the last run at {prior['final_rate'] * 100:.2f}% all-in."
+        facts += (f" From your records for {statement['processor']}: on the last run, the {prior['winner']} approach "
+                  f"got this processor to offer {prior['final_rate'] * 100:.2f}% all-in.")
     ctx = fixtures.shared_context()
     transcripts: dict[str, list[dict]] = {lane: [] for lane in LANES}
     final: dict[str, dict] = {}
 
     def agent_turn(lane: str, rnd: int) -> Iterator[str]:
         history = "\n".join(f"{t['speaker'].upper()}: {t['text']}" for t in transcripts[lane]) or "(opening)"
+        remember = ""
+        if prior and rnd == 1 and prior["winner"] == lane:
+            remember = (f" Open by pointing out that {statement['processor']} already offered "
+                        f"{prior['final_rate'] * 100:.2f}% all-in last time.")
         live = llm.stream(
             lane, shared_context=ctx,
-            instructions=_AGENT_BRIEF[lane] + " Under 70 words. No greeting, no sign-off. Quote numbers only from the facts given.",
+            instructions=_AGENT_BRIEF[lane] + remember + " Under 70 words. No greeting, no sign-off. Quote numbers only from the facts given." + _ONLY_THE_MESSAGE,
             messages=[{"role": "user", "content": f"Facts: {facts}\n\nSo far:\n{history}\n\nWrite your round {rnd} of 3 message to the rep."}],
         )
         got = False
@@ -100,7 +109,7 @@ def stream(statement: dict, b: Baseline, llm: LLM, result: dict[str, Any],
             "processor_rep", shared_context=ctx,
             instructions=(f"You are {neg['rep']['name']}, {neg['rep']['title']}. You protect your company's margin "
                           "and push back realistically, but you are authorised to offer EXACTLY these terms this "
-                          f"round and nothing better: {_offer_terms(step)}. State the offer clearly. Under 50 words."),
+                          f"round and nothing better: {_offer_terms(step)}. State the offer clearly. Under 50 words." + _ONLY_THE_MESSAGE),
             messages=[{"role": "user", "content": f"The owner's negotiator said: {last}"}],
         )
         got = False

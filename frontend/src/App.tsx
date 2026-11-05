@@ -164,8 +164,8 @@ export default function App() {
               <div className="topbar-actions">
                 <span className="run-cost">Run cost <b>${s.costTotal.toFixed(4)}</b> {s.costLive ? "" : "(mock)"}</span>
                 <div className="pace" role="group" aria-label="Pacing">
-                  <button aria-pressed={pace === "presenter"} onClick={() => setPace("presenter")}>Presenter ~75s</button>
-                  <button aria-pressed={pace === "fast"} onClick={() => setPace("fast")}>Fast ~10s</button>
+                  <button aria-pressed={pace === "presenter"} onClick={() => setPace("presenter")}>Presenter{s.services.claude === "live" ? "" : " ~75s"}</button>
+                  <button aria-pressed={pace === "fast"} onClick={() => setPace("fast")}>Fast{s.services.claude === "live" ? "" : " ~10s"}</button>
                 </div>
                 {idle ? (
                   <Btn primary icon="ti-bolt" onClick={start}>Run the swarm</Btn>

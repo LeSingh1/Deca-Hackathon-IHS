@@ -45,6 +45,11 @@ def sweep_rail() -> str:
     return "Stripe test mode" if stripe_mode() == "live" else "sandbox, no real money"
 
 
+def rail_used(action: dict) -> str:
+    """How a finished sweep really ran. A failed Stripe call falls back to the mock."""
+    return "Stripe test mode" if action["provider"] == "stripe" else "sandbox, no real money"
+
+
 def _require(approval: Approval | None, action: str) -> None:
     if approval is None or not approval.approved:
         raise ApprovalRequired(f"refusing to run {action!r} without an owner approval event")
@@ -64,8 +69,7 @@ def rep_email(approval: Approval | None, email: dict) -> dict:
 def savings_sweep(approval: Approval | None, amount: float, run_id: str, merchant: str) -> dict:
     _require(approval, "savings_sweep")
     cents = int(round(amount * 100))
-    detail = {"to": RESERVE_LABEL, "merchant": merchant, "rail_in_production": "FedNow instant payment",
-              "note": f"{sweep_rail()}: no real money moved"}
+    detail = {"to": RESERVE_LABEL, "merchant": merchant, "rail_in_production": "FedNow instant payment"}
     if stripe_mode() == "live":
         try:
             import stripe
@@ -78,11 +82,13 @@ def savings_sweep(approval: Approval | None, amount: float, run_id: str, merchan
                              "approval_id": approval.approval_id if approval else ""},
             }, options={"idempotency_key": f"sweep-{run_id}"})
             return {"action": "savings_sweep", "provider": "stripe", "sandbox": True, "ref": pi.id,
-                    "amount": amount, "detail": {**detail, "status": pi.status, "livemode": bool(pi.livemode)}}
+                    "amount": amount, "detail": {**detail, "status": pi.status, "livemode": bool(pi.livemode),
+                                                 "note": "Stripe test mode: no real money moved"}}
         except Exception as e:  # demo cannot crash: fall back, but say so
             detail["stripe_error"] = type(e).__name__
     return {"action": "savings_sweep", "provider": "mock", "sandbox": True,
-            "ref": _mock_ref("pi", run_id, cents), "amount": amount, "detail": {**detail, "status": "succeeded"}}
+            "ref": _mock_ref("pi", run_id, cents), "amount": amount,
+            "detail": {**detail, "status": "succeeded", "note": "Sandbox mock: no real money moved"}}
 
 
 def fee_receipt(approval: Approval | None, old_rate: float, new_rate: float) -> dict:

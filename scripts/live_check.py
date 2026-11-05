@@ -12,6 +12,7 @@ Exits 1 under --require-live if Claude is mock or any stage fell back to a fixtu
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 import tempfile
@@ -29,6 +30,7 @@ FALLBACK_WORDS = ("mock", "fixture", "template", "taxonomy")
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--require-live", action="store_true", help="fail unless Claude ran live with no fallbacks")
+    parser.add_argument("--save", metavar="PATH", help="write the run's full event log to PATH as JSON")
     args = parser.parse_args()
 
     chips = services()
@@ -38,6 +40,8 @@ def main() -> int:
     run = RunManager().start(phone="+15550100", media=["fixture:statement_marios_trattoria_oct"], pace="instant",
                              auto_approve="YES", background=False)
     errors = [e["message"] for e in run.events if e["event"] == "error"]
+    if args.save:
+        Path(args.save).write_text(json.dumps(run.events, indent=1, default=str))
 
     print("\nagents:")
     seen: dict[str, dict] = {e["agent"]: e for e in run.events if e["event"] == "cost_log"}

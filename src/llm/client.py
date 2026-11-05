@@ -8,7 +8,8 @@ Mock-fallback contract
   also returns None. The demo cannot crash because of the model.
 
 Features used (per docs.claude.com, via the Claude API skill reference)
-- Structured outputs: client.messages.parse(output_format=PydanticModel)
+- Structured outputs: client.messages.stream(output_format=PydanticModel), read
+  from get_final_message().parsed_output
 - Streaming: client.messages.stream(...).text_stream for negotiator turns
 - Prompt caching: the shared context (fee taxonomy, benchmarks, standard
   clauses) is the first system block with cache_control=ephemeral
@@ -130,9 +131,12 @@ class AnthropicProvider:
         return kw
 
     def structured(self, cfg, system, messages, schema):
-        resp = self.client().messages.parse(
+        # Streamed even though we only want the final message: a non-streamed call sends no
+        # bytes until it finishes, so a long Opus answer would die at the client's read timeout.
+        with self.client().messages.stream(
             system=system, messages=messages, output_format=schema, **self._kwargs(cfg)
-        )
+        ) as s:
+            resp = s.get_final_message()
         usage = _usage_from(resp.usage, cfg)
         if resp.stop_reason in ("refusal", "max_tokens"):
             return None, usage, ""

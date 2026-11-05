@@ -5,7 +5,8 @@ replies (simulator or Twilio) resolve the approval gate.
 
 Pacing (seconds slept AFTER each event):
   presenter ~75s end to end (excluding time waiting for YES), fast ~10s,
-  instant 0 (tests, batch).
+  instant 0 (tests, batch). These are the fixture timings: with real models
+  add about 80s for the API calls.
 """
 from __future__ import annotations
 

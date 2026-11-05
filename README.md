@@ -12,7 +12,7 @@ The owner texts a photo of their card-processing statement. The swarm finds the 
 
 [![Watch the demo video](demo/poster.jpg)](https://github.com/LeSingh1/Deca-Hackathon-IHS/releases/download/v1.0.0/shadowbuyer-demo.mp4)
 
-**[▶ Download the demo video](https://github.com/LeSingh1/Deca-Hackathon-IHS/releases/download/v1.0.0/shadowbuyer-demo.mp4)** (about 5 minutes, 19 MB). It's silent on purpose, with no voice, captions or title cards, and slow enough to talk over in person; [DEMO.md](DEMO.md) has a talk track timed to it. It's recorded from the running app in zero-key mock mode: the full run, a question at the approval gate, YES, the PDF, then a second run that uses memory and ends in NO.
+**[▶ Download the demo video](https://github.com/LeSingh1/Deca-Hackathon-IHS/releases/download/v1.0.0/shadowbuyer-demo.mp4)** (about 4:40, 20 MB). It's silent on purpose, with no voice, captions or title cards, and slow enough to talk over in person; [DEMO.md](DEMO.md) has a talk track timed to it. It's recorded from the running app with **real Claude** on every agent (Stripe and Twilio are sandboxed): the full run, a question at the approval gate, YES, the PDF, then a second run that uses memory and ends in NO. About a minute of waiting on the API is cut from the second run.
 
 ## The problem
 
@@ -76,7 +76,7 @@ Owner texts statement photo (Twilio SMS or the built-in simulator, same webhook 
 
 `SHADOWBUYER_USE_FABLE=1` moves the Referee and Contract Exposer to `claude-fable-5-1`. `SHADOWBUYER_MODEL_<AGENT>=<id>` overrides any single agent. To route one agent to a different provider, register it with `register_provider()` and set that agent's `provider` field. Agent code doesn't change.
 
-API features used (Anthropic Python SDK): `messages.parse` structured outputs with Pydantic schemas (one retry, then the fixture), `messages.stream` for negotiator turns, `cache_control` on the shared context (fee taxonomy, benchmarks, documents), adaptive thinking with `display: "summarized"` on Opus agents (only the summary reaches the UI), `output_config.effort` per agent, and per-agent token/cost logging (`cost_log` events, the top-bar readout and the Service health screen).
+API features used (Anthropic Python SDK): `messages.stream(output_format=...)` structured outputs with Pydantic schemas, streamed so long answers can't hit the read timeout (one retry, then the fixture), `messages.stream` for negotiator turns, `cache_control` on the shared context (fee taxonomy, benchmarks, documents), adaptive thinking with `display: "summarized"` on Opus agents (only the summary reaches the UI), `output_config.effort` per agent, and per-agent token/cost logging (`cost_log` events, the top-bar readout and the Service health screen).
 
 ## Run it
 
@@ -121,7 +121,7 @@ Then click **Run demo**, or text a statement photo (or the word DEMO for the sam
 
 ```bash
 python3 -m venv .venv && .venv/bin/python -m pip install -r requirements-dev.txt
-.venv/bin/python -m pytest -q    # 88 tests, ~3 s
+.venv/bin/python -m pytest -q    # 112 tests, ~6 s
 cd frontend && npm ci && npm run typecheck
 ```
 
@@ -129,6 +129,7 @@ cd frontend && npm ci && npm run typecheck
 - `tests/test_contract.py`: the Python and TypeScript contracts agree.
 - `tests/test_pipeline.py`: a zero-env end-to-end run whose headline numbers are recomputed independently from the fixtures; no action before approval and none after NO; Stripe refuses live keys; memory makes the second run smarter; live mode calls exactly the models in `models.py` (and still yields the calculator numbers when the model returns nothing); the simulator → SSE → YES → PDF API flow.
 - `tests/test_llm_sdk.py`: the real Anthropic SDK against a mocked HTTP transport.
+- `tests/test_live_path.py`: a full run where every agent uses a model's answer, plus models that invent numbers or refuse; Stripe through its real SDK against a local stand-in; the owner's full SMS conversation with Twilio's calls captured.
 - `tests/test_hardening.py`: path traversal, natural yes/no/unclear replies, forged and misrouted approvals, Twilio signatures, malformed input, real uploads never showing fixture numbers or claiming a negotiation, sandbox labels, memory, the live-check script.
 
 ## Repo layout
@@ -159,17 +160,19 @@ See [DEMO.md](DEMO.md) for the 3-minute script and [PRIOR_WORK.md](PRIOR_WORK.md
 
 ## Status
 
-**Verified:** the full demo runs in a real browser with zero keys (both YES and NO paths), and the 88 tests, typecheck and production build pass.
+**Verified against the real Claude API:** a full run with `scripts/live_check.py --require-live` used all 8 agents live with no fixture fallbacks and kept the calculator's headline numbers. It took about 80 seconds and cost about $0.17.
 
-**CI:** `.github/workflows/ci.yml` runs those checks on Python 3.12 and Node 22, then builds the Docker image and smoke-tests the running container. The badge at the top shows its latest result.
+**Verified in CI** (`.github/workflows/ci.yml`, badge above): the 112 tests, typecheck and production build on Python 3.12 and Node 22, then the Docker image is built and smoke-tested as a running container.
 
-**Not yet exercised against the real services:** live Claude calls (tested through the real SDK with a mocked HTTP transport), Stripe test mode and Twilio delivery. To check Claude and Stripe once you have keys (this makes real, paid API calls):
+**Verified in a real browser:** the full demo with zero keys and with real Claude, both YES and NO paths.
+
+**Not yet exercised against the real services:** Stripe test mode and Twilio delivery. Both are tested through their code paths against local stand-ins, and they need their own accounts. A Stripe test key is free; add it to `.env` and rerun `live_check.py`. Twilio needs a real number and a text to it.
 
 ```bash
 cp .env.example .env    # add your keys
-set -a; . ./.env; set +a; .venv/bin/python scripts/live_check.py --require-live
+set -a; . ./.env; set +a; .venv/bin/python scripts/live_check.py --require-live    # real, paid API calls
 ```
 
-Twilio needs a real number and a text to it.
+**Not built:** real negotiation. The processor rep is simulated, and a real owner's statement gets only the fee analysis and benchmark.
 
 *Informational only; not legal or financial advice.*

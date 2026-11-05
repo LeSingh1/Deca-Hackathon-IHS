@@ -29,6 +29,8 @@ class _Mock:
     def __call__(self, req: httpx2.Request) -> httpx2.Response:
         body = json.loads(req.content)
         self.requests.append(body)
+        if body.get("output_config", {}).get("format"):
+            return self._structured(body)
         if body.get("stream"):
             parts = [
                 _sse("message_start", {"type": "message_start", "message": {
@@ -43,18 +45,35 @@ class _Mock:
                 _sse("message_stop", {"type": "message_stop"}),
             ]
             return httpx2.Response(200, headers={"content-type": "text/event-stream"}, content="".join(parts).encode())
+        raise AssertionError(f"unexpected non-streamed request: {sorted(body)}")
+
+    @staticmethod
+    def _structured(body: dict) -> httpx2.Response:
+        assert body.get("stream") is True, "structured calls must stream"
         props = body["output_config"]["format"]["schema"]["properties"]
         payload = ({"rationale": "Hardball wins."} if "rationale" in props else
                    {"items": [{"id": "L01", "category": "interchange", "tag": "Interchange", "reason": "bank"}]})
-        content = []
+        parts = [_sse("message_start", {"type": "message_start", "message": {
+            "id": "msg", "type": "message", "role": "assistant", "model": body["model"], "content": [],
+            "stop_reason": None, "stop_sequence": None,
+            "usage": {"input_tokens": 1200, "output_tokens": 1, "cache_read_input_tokens": 900, "cache_creation_input_tokens": 0}}})]
+        i = 0
         if body.get("thinking"):
-            content.append({"type": "thinking", "thinking": "Compared the options.", "signature": "sig"})
-        content.append({"type": "text", "text": json.dumps(payload)})
-        return httpx2.Response(200, json={
-            "id": "msg", "type": "message", "role": "assistant", "model": body["model"], "content": content,
-            "stop_reason": "end_turn", "stop_sequence": None,
-            "usage": {"input_tokens": 1200, "output_tokens": 80, "cache_read_input_tokens": 900,
-                      "cache_creation_input_tokens": 0}})
+            parts += [
+                _sse("content_block_start", {"type": "content_block_start", "index": 0, "content_block": {"type": "thinking", "thinking": "", "signature": ""}}),
+                _sse("content_block_delta", {"type": "content_block_delta", "index": 0, "delta": {"type": "thinking_delta", "thinking": "Compared the options."}}),
+                _sse("content_block_delta", {"type": "content_block_delta", "index": 0, "delta": {"type": "signature_delta", "signature": "sig"}}),
+                _sse("content_block_stop", {"type": "content_block_stop", "index": 0}),
+            ]
+            i = 1
+        parts += [
+            _sse("content_block_start", {"type": "content_block_start", "index": i, "content_block": {"type": "text", "text": ""}}),
+            _sse("content_block_delta", {"type": "content_block_delta", "index": i, "delta": {"type": "text_delta", "text": json.dumps(payload)}}),
+            _sse("content_block_stop", {"type": "content_block_stop", "index": i}),
+            _sse("message_delta", {"type": "message_delta", "delta": {"stop_reason": "end_turn", "stop_sequence": None}, "usage": {"output_tokens": 80}}),
+            _sse("message_stop", {"type": "message_stop"}),
+        ]
+        return httpx2.Response(200, headers={"content-type": "text/event-stream"}, content="".join(parts).encode())
 
 
 @pytest.fixture
