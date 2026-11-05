@@ -12,7 +12,7 @@ The owner texts a photo of their card-processing statement. The swarm finds the 
 
 [![Watch the demo video](demo/poster.jpg)](https://github.com/LeSingh1/Deca-Hackathon-IHS/releases/download/v1.0.0/shadowbuyer-demo.mp4)
 
-**[▶ Download the demo video](https://github.com/LeSingh1/Deca-Hackathon-IHS/releases/download/v1.0.0/shadowbuyer-demo.mp4)** (about 3 minutes, 24 MB, narrated and captioned). It's recorded from the running app in zero-key mock mode: the full run, a question at the approval gate, YES, the PDF, then a second run that uses memory and ends in NO.
+**[▶ Download the demo video](https://github.com/LeSingh1/Deca-Hackathon-IHS/releases/download/v1.0.0/shadowbuyer-demo.mp4)** (about 5 minutes, 19 MB). It's silent on purpose, with no voice, captions or title cards, and slow enough to talk over in person; [DEMO.md](DEMO.md) has a talk track timed to it. It's recorded from the running app in zero-key mock mode: the full run, a question at the approval gate, YES, the PDF, then a second run that uses memory and ends in NO.
 
 ## The problem
 
@@ -26,7 +26,7 @@ The owner texts a photo of their card-processing statement. The swarm finds the 
 ## How it works
 
 ```
-Owner texts statement photo (Twilio SMS or the phone simulator, same webhook handler)
+Owner texts statement photo (Twilio SMS or the built-in simulator, same webhook handler)
   → Statement Reader     Sonnet 5.5 vision → line items (must sum to the printed total)
   → Fee Hunter           Haiku 5.5 → interchange / assessments / markup / junk / lease
   → Rate Scout           deterministic: fair IC+ benchmark + competitor quotes + exit costs
@@ -42,7 +42,7 @@ Owner texts statement photo (Twilio SMS or the phone simulator, same webhook han
 ### Rules the code enforces
 
 1. **Money math is code, never the model.** `src/finance/` holds pure, unit-tested functions: `effective_rate`, `fee_breakdown`, `plan_monthly_cost`, `annual_savings`, `mca_true_apr` (IRR on the daily remittance schedule, APR = daily IRR × 365), `early_termination_cost`, `net_switch_benefit`. The rep's offers come from a fixed concession ladder priced by these functions. Model-written prose (Referee rationale, redlines, rep email) passes a **number guard**: any $ or % that isn't a calculator output sends the agent back to its template.
-2. **Mock fallback everywhere.** With zero env vars, the full demo runs on deterministic fixtures. Any live failure (network, auth, refusal, schema mismatch after one retry) degrades to the fixture. Header chips show `live`/`mock` per service. The one exception is a real owner's photo: if it can't be read, they're told so and are never shown the fixture's numbers.
+2. **Mock fallback everywhere.** With zero env vars, the full demo runs on deterministic fixtures. Any live failure (network, auth, refusal, schema mismatch after one retry) degrades to the fixture. The sidebar and the Service health screen show `live`/`mock` per service. The one exception is a real owner's photo: if it can't be read, they're told so and are never shown the fixture's numbers.
 3. **Human in the loop.** The pipeline blocks at `approval_requested`. Executor functions raise `ApprovalRequired` without an approved `Approval`. Every action is sandbox and labeled as such. Replies are read conservatively: "yes please" approves, "no thanks" declines, and anything unclear ("what does this mean?", "yes but not the email") gets re-asked with the gate still closed. Once made, a decision can't be flipped by a later text.
 4. **Honest data.** Benchmark and competitor figures carry `source`, `as_of` and `illustrative`. The merchant, processor, lender and documents are fictional.
 5. **Frozen contract.** `src/contract.py` (v1.0.0) is mirrored in `frontend/src/lib/contract.ts`. Every event is validated at emit time, and a test fails if the two files drift.
@@ -58,7 +58,7 @@ Owner texts statement photo (Twilio SMS or the phone simulator, same webhook han
 | Negotiation | The processor rep is **simulated** (Haiku 5.5 bound to a concession ladder). Nobody real is contacted. |
 | Rep email | **Dry run**: drafted and shown, never sent |
 | Savings sweep | With a `sk_test_` key: **Stripe test mode** PaymentIntent with metadata `bucket=Tax & Rainy-Day reserve`. Without one, a labeled mock. `sk_live_` keys are refused. No real money moves either way. Production rail would be FedNow. |
-| SMS | Twilio sandbox/trial number if configured; otherwise the in-app phone simulator (same handler) |
+| SMS | Twilio sandbox/trial number if configured; otherwise the Owner texts screen (same handler) |
 | Memory | Local JSON file: owner profile, past statements, decisions, winning tactics. On the next run the winning negotiator opens from what worked; the offers still come from the ladder. |
 | A real owner's statement | They get only what their own statement shows: hidden fees, their all-in rate and an illustrative fair benchmark. The negotiation, contract markup, approval and sweep use a simulated rep and fictional documents, so they run only in the demo, and the owner is told nobody was contacted. |
 
@@ -76,7 +76,7 @@ Owner texts statement photo (Twilio SMS or the phone simulator, same webhook han
 
 `SHADOWBUYER_USE_FABLE=1` moves the Referee and Contract Exposer to `claude-fable-5-1`. `SHADOWBUYER_MODEL_<AGENT>=<id>` overrides any single agent. To route one agent to a different provider, register it with `register_provider()` and set that agent's `provider` field. Agent code doesn't change.
 
-API features used (Anthropic Python SDK): `messages.parse` structured outputs with Pydantic schemas (one retry, then the fixture), `messages.stream` for negotiator turns, `cache_control` on the shared context (fee taxonomy, benchmarks, documents), adaptive thinking with `display: "summarized"` on Opus agents (only the summary reaches the UI), `output_config.effort` per agent, and per-agent token/cost logging (`cost_log` events and the header readout).
+API features used (Anthropic Python SDK): `messages.parse` structured outputs with Pydantic schemas (one retry, then the fixture), `messages.stream` for negotiator turns, `cache_control` on the shared context (fee taxonomy, benchmarks, documents), adaptive thinking with `display: "summarized"` on Opus agents (only the summary reaches the UI), `output_config.effort` per agent, and per-agent token/cost logging (`cost_log` events, the top-bar readout and the Service health screen).
 
 ## Run it
 
@@ -92,7 +92,7 @@ docker build -t shadowbuyer . && docker run -p 8000:8000 --env-file .env shadowb
 cd frontend && npm run dev
 ```
 
-Then click **Run demo**, or text a statement photo (or the word DEMO for the sample run) to your Twilio number. Choose **Presenter (~75 s)** or **Fast (~10 s)** in the header.
+Then click **Run demo**, or text a statement photo (or the word DEMO for the sample run) to your Twilio number. Choose **Presenter ~75s** or **Fast ~10s** in the top bar. During a run the screen follows the swarm until you pick a screen yourself.
 
 ### Environment variables (all optional; see `.env.example`)
 
@@ -111,7 +111,7 @@ Then click **Run demo**, or text a statement photo (or the word DEMO for the sam
 | Endpoint | Purpose |
 |---|---|
 | `POST /api/demo/start?pace=presenter\|fast` | the owner texts the fixture statement |
-| `POST /api/sms/inbound` `{from, body, media[], run_id?}` | phone simulator (same handler as Twilio); `media` accepts only the demo fixture, `run_id` picks the run to answer |
+| `POST /api/sms/inbound` `{from, body, media[], run_id?}` | text simulator (same handler as Twilio); `media` accepts only the demo fixture, `run_id` picks the run to answer |
 | `POST /sms/twilio` | Twilio webhook (form-encoded, signature checked when live) |
 | `GET /api/runs/{id}/events` | SSE stream (replay + tail, resumes on `Last-Event-ID`) |
 | `GET /api/runs/{id}/report.pdf` | lender/accountant-ready PDF |
@@ -146,7 +146,7 @@ src/
   pipeline.py   the swarm, as a generator of contract events
   runs.py       run manager: pacing, validation, approval gate, SSE fan-out
   app.py        FastAPI
-frontend/       Vite + React 19 + Motion, two-screen UI
+frontend/       Vite + React 19 + Motion. Sidebar workspace in the original ShadowBuyer format; src/procure.css is the original stylesheet
 fixtures/       fictional statement (JSON + PDF), taxonomy, benchmarks, quotes, MCA offer, agreement, redlines, ladder
 tests/          calculators, contract drift, pipeline, SDK-level LLM, hardening
 scripts/        dev.sh (one command), live_check.py (confirm live keys), make_statement_pdf.py
@@ -159,7 +159,9 @@ See [DEMO.md](DEMO.md) for the 3-minute script and [PRIOR_WORK.md](PRIOR_WORK.md
 
 ## Status
 
-**Verified:** the full demo runs in a real browser with zero keys (both YES and NO paths). CI runs the 88 tests, typecheck and production build on Python 3.12 and Node 22, then builds the Docker image and smoke-tests the running container.
+**Verified:** the full demo runs in a real browser with zero keys (both YES and NO paths), and the 88 tests, typecheck and production build pass.
+
+**CI:** `.github/workflows/ci.yml` runs those checks on Python 3.12 and Node 22, then builds the Docker image and smoke-tests the running container. The badge at the top shows its latest result.
 
 **Not yet exercised against the real services:** live Claude calls (tested through the real SDK with a mocked HTTP transport), Stripe test mode and Twilio delivery. To check Claude and Stripe once you have keys (this makes real, paid API calls):
 

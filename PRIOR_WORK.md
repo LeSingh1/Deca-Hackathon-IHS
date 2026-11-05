@@ -30,8 +30,12 @@ The product, customer, money math, agents, UI and integrations are new:
 | Owner channel | Twilio SMS webhook and phone-frame simulator driving the same handler |
 | Report | Server-side lender/accountant-ready PDF (reportlab) with the MCA paydown chart |
 | Fixtures | Fictional statement (JSON + PDF), fee taxonomy, benchmarks, competitor quotes, MCA offer, merchant agreement, redlines, negotiation ladder |
-| Frontend | New Vite + React 19 + Motion app: two-screen layout, new visual design, all animations |
+| Frontend | New Vite + React 19 + Motion app: every screen and all state logic are new code for this product (see below for the styling that carried over) |
 | Tests | 88 tests: calculators, contract drift, end-to-end mock run, approval gate, live-model routing, API, and hardening (path traversal, forged approvals, reply parsing, malformed input) |
+
+## What carried over as code
+
+- **The UI format.** `frontend/src/procure.css` is the prior project's stylesheet, copied unchanged from `legacy/frontend/src/procure/procure.css`. The sidebar, top bar, metric cards, list tables, negotiation columns, verdict card, email card and service rows follow its layout. The product's own additions are in `frontend/src/shadowbuyer.css`.
 
 ## What carried over as ideas (not code)
 

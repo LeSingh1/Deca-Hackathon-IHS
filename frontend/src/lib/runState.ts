@@ -70,6 +70,7 @@ export interface RunState {
   ledger: LedgerUpdate | null;
   costTotal: number;
   costLive: boolean;
+  agents: Record<string, { model: string; live: boolean; usd: number }>;
   summary: Summary | null;
   error: string | null;
 }
@@ -100,6 +101,7 @@ export const initialState = (services: Record<string, string> = {}): RunState =>
   ledger: null,
   costTotal: 0,
   costLive: false,
+  agents: {},
   summary: null,
   error: null,
 });
@@ -183,7 +185,15 @@ function applyEvent(s: RunState, ev: SwarmEvent): RunState {
     case "ledger_update":
       return { ...s, ledger: ev };
     case "cost_log":
-      return { ...s, costTotal: ev.run_total_usd, costLive: s.costLive || ev.live };
+      return {
+        ...s,
+        costTotal: ev.run_total_usd,
+        costLive: s.costLive || ev.live,
+        agents: {
+          ...s.agents,
+          [ev.agent]: { model: ev.model, live: ev.live, usd: (s.agents[ev.agent]?.usd ?? 0) + ev.usd },
+        },
+      };
     case "summary":
       return { ...s, summary: ev };
     case "done":

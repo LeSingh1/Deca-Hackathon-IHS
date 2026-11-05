@@ -1,74 +1,52 @@
-import { MotionConfig, useReducedMotion } from "motion/react";
+import { MotionConfig } from "motion/react";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-import { ActionPanel } from "./components/ActionPanel";
-import { AprPanel } from "./components/AprPanel";
-import { Header, type Theme } from "./components/Header";
-import { Hero } from "./components/Hero";
-import { NegotiationPanel } from "./components/NegotiationPanel";
-import { Phone } from "./components/Phone";
-import { RatePanel } from "./components/RatePanel";
-import { RedlinePanel } from "./components/RedlinePanel";
-import { StageRail } from "./components/StageRail";
-import { StatementPanel } from "./components/StatementPanel";
+import { Btn } from "./components/ui";
 import { getServices, sendSms, startDemo, subscribe, type Pace } from "./lib/api";
 import type { Stage } from "./lib/contract";
 import { initialState, reducer } from "./lib/runState";
+import { CashAdvance } from "./views/CashAdvance";
+import { Contracts } from "./views/Contracts";
+import { Negotiation } from "./views/Negotiation";
+import { Overview } from "./views/Overview";
+import { OwnerTexts } from "./views/OwnerTexts";
+import { Quotes } from "./views/Quotes";
+import { Savings } from "./views/Savings";
+import { ServiceHealth } from "./views/ServiceHealth";
+import { Statement } from "./views/Statement";
 
-const PANEL_FOR: Partial<Record<Stage, string>> = {
-  statement_reader: "statement_reader",
-  fee_hunter: "fee_hunter",
-  rate_scout: "rate_scout",
-  negotiator: "negotiator",
-  contract_exposer: "contract_exposer",
-  action_drafter: "action_drafter",
-  approval: "action_drafter",
-  executor: "action_drafter",
+type ViewId = "overview" | "texts" | "statement" | "quotes" | "negotiation" | "advance" | "contracts" | "savings" | "services";
+
+const VIEWS: { id: ViewId; label: string; icon: string; stages?: Stage[] }[] = [
+  { id: "overview", label: "Overview", icon: "ti-layout-dashboard" },
+  { id: "texts", label: "Owner texts", icon: "ti-mail", stages: ["statement_reader", "approval"] },
+  { id: "statement", label: "Statement", icon: "ti-file-invoice", stages: ["fee_hunter"] },
+  { id: "quotes", label: "Quotes", icon: "ti-scale", stages: ["rate_scout"] },
+  { id: "negotiation", label: "Negotiation log", icon: "ti-messages", stages: ["negotiator"] },
+  { id: "advance", label: "Cash advance", icon: "ti-alert-triangle" },
+  { id: "contracts", label: "Contracts", icon: "ti-file-check", stages: ["contract_exposer"] },
+  { id: "savings", label: "Savings", icon: "ti-coin", stages: ["action_drafter", "executor"] },
+  { id: "services", label: "Service health", icon: "ti-plug" },
+];
+
+// While a run is playing, the screen follows the swarm until the viewer picks a screen themselves.
+const FOLLOW: Partial<Record<Stage, ViewId>> = {
+  statement_reader: "texts",
+  fee_hunter: "statement",
+  rate_scout: "quotes",
+  negotiator: "negotiation",
+  contract_exposer: "advance",
+  action_drafter: "savings",
+  approval: "texts",
+  executor: "savings",
 };
-
-function readTheme(): Theme {
-  try {
-    const t = localStorage.getItem("sb-theme");
-    return t === "light" || t === "dark" ? t : "system";
-  } catch {
-    return "system";
-  }
-}
-
-function Intro({ onStart }: { onStart: () => void }) {
-  return (
-    <section className="panel intro">
-      <h1>Card fees can cost a restaurant as much as it keeps in profit.</h1>
-      <p>
-        An independent restaurant doing $1.2M a year on cards runs on 3-4% margins and loses 2-3% of every swipe to
-        processing. The worst of it hides in tier surcharges, junk fees and contracts nobody reads, and the
-        &ldquo;simple&rdquo; cash advance in their inbox can cost 60-150% APR.
-      </p>
-      <p>
-        ShadowBuyer is a swarm of agents that works over text. The owner sends a photo of the statement. The agents find the
-        fees, translate the cash advance into a real APR, negotiate with the processor, and act only after the owner
-        replies YES.
-      </p>
-      <div className="stats">
-        <div><b>2-3%</b><span>of every card sale goes to fees</span></div>
-        <div><b>3-4%</b><span>typical full-service margin</span></div>
-        <div><b>60-150%</b><span>APR hidden in many cash advances</span></div>
-      </div>
-      <button className="btn money" onClick={onStart} style={{ fontSize: 18, padding: "14px 24px" }}>
-        Run demo: Mario&apos;s Trattoria
-      </button>
-      <p className="hint" style={{ marginTop: 14 }}>
-        Fictional restaurant, processor and lender. Benchmarks are labeled illustrative. All figures come from tested calculators.
-      </p>
-    </section>
-  );
-}
 
 export default function App() {
   const [s, dispatch] = useReducer(reducer, undefined, () => initialState());
   const [pace, setPace] = useState<Pace>("presenter");
-  const [theme, setThemeState] = useState<Theme>(readTheme);
+  const [view, setView] = useState<ViewId>("overview");
+  const follow = useRef(false);
   const unsub = useRef<(() => void) | null>(null);
-  const reduce = useReducedMotion();
+  const content = useRef<HTMLElement>(null);
 
   useEffect(() => {
     getServices().then((services) => dispatch({ type: "services", services }));
@@ -76,27 +54,25 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const root = document.documentElement;
-    if (theme === "system") root.removeAttribute("data-theme");
-    else root.setAttribute("data-theme", theme);
-    try {
-      localStorage.setItem("sb-theme", theme);
-    } catch {
-      /* storage unavailable: theme still applies for this session */
-    }
-  }, [theme]);
+    const next = s.active && FOLLOW[s.active];
+    if (follow.current && next) setView(next);
+  }, [s.active]);
 
-  // Keep the active agent's panel in view while presenting.
   useEffect(() => {
-    if (!s.active) return;
-    const id = PANEL_FOR[s.active];
-    const el = id ? document.getElementById(`panel-${id}`) : null;
-    el?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
-  }, [s.active, reduce]);
+    if (follow.current && s.redlines.length === 1) setView("contracts");
+  }, [s.redlines.length]);
+
+  // Keep the newest thing on screen while following.
+  useEffect(() => {
+    const el = content.current;
+    if (follow.current && el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+  }, [s.redlines.length, s.verdict, s.messages.length]);
 
   const start = useCallback(async () => {
     unsub.current?.();
     dispatch({ type: "starting" });
+    follow.current = true;
+    setView("texts");
     const runId = await startDemo(pace);
     if (!runId) {
       dispatch({ type: "event", ev: { event: "error", run_id: "", seq: 0, message: "Could not reach the backend." } });
@@ -105,8 +81,16 @@ export default function App() {
     unsub.current = subscribe(runId, (ev) => dispatch({ type: "event", ev }));
   }, [pace]);
 
+  const restart = useCallback(() => {
+    unsub.current?.();
+    follow.current = false;
+    dispatch({ type: "reset", services: s.services });
+    setView("overview");
+  }, [s.services]);
+
   const send = useCallback(
     (body: string) => {
+      follow.current = true;
       dispatch({ type: "notice", message: null });
       void sendSms(body, s.runId).then((ok) => {
         if (!ok) dispatch({ type: "notice", message: "That text didn't send. Check the connection and try again." });
@@ -115,56 +99,97 @@ export default function App() {
     [s.runId],
   );
 
-  const restart = useCallback(() => {
-    unsub.current?.();
-    dispatch({ type: "reset", services: s.services });
-  }, [s.services]);
+  const pick = (id: ViewId) => {
+    follow.current = false;
+    setView(id);
+  };
 
   const idle = s.status === "idle";
+  const awaiting = s.status === "awaiting" && !!s.approval && !s.approvalReceived;
+  const counts: Partial<Record<ViewId, number>> = {
+    texts: s.messages.length || undefined,
+    statement: s.lineItems.length || undefined,
+    quotes: s.rate?.quotes.length,
+    contracts: s.redlines.length || undefined,
+    savings: s.actions.length || undefined,
+    services: Object.keys(s.services).length || undefined,
+  };
+  const active = VIEWS.find((v) => v.id === view);
 
   return (
     <MotionConfig reducedMotion="user">
-      <Header
-        services={s.services}
-        pace={pace}
-        setPace={setPace}
-        theme={theme}
-        setTheme={setThemeState}
-        cost={s.costTotal}
-        costLive={s.costLive}
-        canRestart={!idle}
-        onRestart={restart}
-      />
-      <main className="stage">
-        <div className="phone-col">
-          <Phone state={s} onSend={send} onStart={start} />
-        </div>
-        <div className="cc" aria-label="Swarm command center">
-          {idle ? (
-            <Intro onStart={start} />
-          ) : (
-            <>
-              <Hero s={s} />
-              <StageRail s={s} />
-              {s.error && (
-                <div className="panel" role="alert" style={{ borderColor: "var(--trap)" }}>
-                  {s.error}
+      <div className="procure-root">
+        <div className="shell">
+          <aside className="sidebar">
+            <div className="logo">
+              <i className="ti ti-building-store" aria-hidden="true" />
+              ShadowBuyer
+              <small>for Main Street</small>
+            </div>
+            <span className="nav-section">Workspace</span>
+            {VIEWS.map((v) => {
+              const isActiveStage = !!s.active && !!v.stages?.includes(s.active);
+              return (
+                <button key={v.id} className={`nav-item ${view === v.id ? "active" : ""}`} onClick={() => pick(v.id)}>
+                  <i className={`ti ${v.icon}`} aria-hidden="true" />
+                  {v.label}
+                  {v.id === "texts" && awaiting ? (
+                    <span className="nav-badge ask">Reply</span>
+                  ) : isActiveStage ? (
+                    <span className="swarm-dot live nav-pulse" aria-label="working" />
+                  ) : counts[v.id] != null ? (
+                    <span className="nav-badge">{counts[v.id]}</span>
+                  ) : null}
+                </button>
+              );
+            })}
+            <div className="sidebar-bottom">
+              <div className="side-status" aria-label="Service status">
+                {Object.entries(s.services).map(([k, mode]) => (
+                  <div key={k}>
+                    <span className={`dot ${mode === "live" ? "dot-green" : "dot-amber"}`} />
+                    {k.charAt(0).toUpperCase() + k.slice(1)} · {mode}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </aside>
+
+          <div className="main">
+            <header className="topbar">
+              <div className="topbar-left">
+                <span className="page-title">{active?.label}</span>
+                {counts[view] != null && <span className="page-count">{counts[view]}</span>}
+              </div>
+              <div className="topbar-actions">
+                <span className="run-cost">Run cost <b>${s.costTotal.toFixed(4)}</b> {s.costLive ? "" : "(mock)"}</span>
+                <div className="pace" role="group" aria-label="Pacing">
+                  <button aria-pressed={pace === "presenter"} onClick={() => setPace("presenter")}>Presenter ~75s</button>
+                  <button aria-pressed={pace === "fast"} onClick={() => setPace("fast")}>Fast ~10s</button>
                 </div>
-              )}
-              <StatementPanel s={s} />
-              <RatePanel s={s} />
-              <NegotiationPanel s={s} />
-              <AprPanel s={s} />
-              <RedlinePanel s={s} />
-              <ActionPanel s={s} />
-              <p className="foot">
-                ShadowBuyer for Main Street · every dollar figure is computed by unit-tested calculators, never by a model ·
-                sandbox actions are labeled · contract v1.0.0
-              </p>
-            </>
-          )}
+                {idle ? (
+                  <Btn primary icon="ti-bolt" onClick={start}>Run the swarm</Btn>
+                ) : (
+                  <Btn primary icon="ti-refresh" onClick={restart}>New run</Btn>
+                )}
+              </div>
+            </header>
+
+            <main className="content" ref={content} key={view}>
+              {s.error && <div className="error-box" role="alert" style={{ marginBottom: 14 }}>{s.error}</div>}
+              {view === "overview" && <Overview s={s} onStart={start} />}
+              {view === "texts" && <OwnerTexts s={s} onSend={send} onStart={start} />}
+              {view === "statement" && <Statement s={s} />}
+              {view === "quotes" && <Quotes s={s} />}
+              {view === "negotiation" && <Negotiation s={s} onRun={start} />}
+              {view === "advance" && <CashAdvance s={s} />}
+              {view === "contracts" && <Contracts s={s} />}
+              {view === "savings" && <Savings s={s} />}
+              {view === "services" && <ServiceHealth s={s} />}
+            </main>
+          </div>
         </div>
-      </main>
+      </div>
     </MotionConfig>
   );
 }
