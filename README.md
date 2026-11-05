@@ -8,9 +8,9 @@ The owner texts a photo of their card-processing statement. The swarm finds the 
 
 ## Watch the demo
 
-[![Watch the demo video](demo/poster.jpg)](demo/shadowbuyer-demo.mp4)
+[![Watch the demo video](demo/poster.jpg)](https://github.com/LeSingh1/Deca-Hackathon-IHS/releases/download/v1.0.0/shadowbuyer-demo.mp4)
 
-**[▶ Watch the demo](demo/shadowbuyer-demo.mp4)** (about 3 minutes, narrated and captioned) or [download it from the latest release](https://github.com/LeSingh1/Deca-Hackathon-IHS/releases/latest). It's recorded from the running app in zero-key mock mode: the full run, a question at the approval gate, YES, the PDF, then a second run that uses memory and ends in NO.
+**[▶ Download the demo video](https://github.com/LeSingh1/Deca-Hackathon-IHS/releases/download/v1.0.0/shadowbuyer-demo.mp4)** (about 3 minutes, 24 MB, narrated and captioned). It's recorded from the running app in zero-key mock mode: the full run, a question at the approval gate, YES, the PDF, then a second run that uses memory and ends in NO.
 
 ## The problem
 
