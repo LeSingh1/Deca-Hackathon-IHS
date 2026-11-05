@@ -278,3 +278,65 @@ def test_sweep_rail_names_stripe_only_with_a_test_key(monkeypatch: pytest.Monkey
     assert "Stripe" not in sweep_rail()
     monkeypatch.setenv("STRIPE_SECRET_KEY", "sk_test_ok")
     assert sweep_rail() == "Stripe test mode"
+
+
+# ---------------------------------------------------------------- a real owner's statement
+def _parsed_real_statement() -> dict:
+    """A statement as the Statement Reader returns it for someone else's business."""
+    import copy
+
+    from src.agents import fixtures
+    st = copy.deepcopy(fixtures.load("statement_marios_trattoria_oct"))
+    st["merchant"]["name"] = "Bella's Bistro"
+    st["processor"] = "Acme Payments"
+    st["monthly_volume"] = 50000.0
+    st["transaction_count"] = 1000
+    for li in st["line_items"]:
+        li["amount"] = round(li["amount"] / 2, 2)
+    return st
+
+
+def _real_run(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, statement: dict) -> Run:
+    from src import pipeline
+    monkeypatch.setattr(pipeline.statement_reader, "read", lambda media, llm: (statement, True))
+    photo = tmp_path / "statement.jpg"
+    photo.write_bytes(b"\xff\xd8\xff")
+    return RunManager().start(phone="+15550777", media=[f"file:{photo}"], pace="instant", channel="twilio",
+                              auto_approve="YES", background=False)
+
+
+def test_real_statement_gets_only_what_was_actually_found(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    from src.finance import effective_rate
+    st = _parsed_real_statement()
+    run = _real_run(monkeypatch, tmp_path, st)
+    names = {e["event"] for e in run.events}
+    # The negotiation is simulated and the agreement and advance are fictional, so none of it may reach a real owner.
+    assert not names & {"negotiation_turn", "referee_verdict", "apr_revealed", "redline", "approval_requested", "action_executed"}
+    text = _out_messages(run)[-1]
+    rate = effective_rate(sum(li["amount"] for li in st["line_items"]), st["monthly_volume"])
+    assert f"{rate * 100:.2f}%" in text and "Acme Payments" in text
+    for fictional in ("Keystone", "FastFund", "Harbor", "Maria", "Mario", "I got", "Reply YES"):
+        assert fictional not in text
+    assert "haven't contacted" in text
+    assert run.events[-1]["event"] == "done" and run.events[-1]["ok"] is True
+
+
+def test_real_statement_already_near_fair_is_told_so(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    st = _parsed_real_statement()
+    keep = [li for li in st["line_items"] if li["id"] in ("L01", "L02")]     # pass-through costs only
+    st["line_items"] = keep
+    text = _out_messages(_real_run(monkeypatch, tmp_path, st))[-1]
+    assert "close to" in text and "/yr less" not in text
+
+
+def test_live_check_script_reports_mock_without_keys(tmp_path: Path) -> None:
+    import os
+    import subprocess
+    import sys
+    root = Path(__file__).resolve().parents[1]
+    env = {k: v for k, v in os.environ.items() if k not in ("ANTHROPIC_API_KEY", "STRIPE_SECRET_KEY")}
+    env["SHADOWBUYER_MEMORY_PATH"] = str(tmp_path / "m.json")
+    ok = subprocess.run([sys.executable, "scripts/live_check.py"], cwd=root, env=env, capture_output=True, text=True)
+    assert ok.returncode == 0 and "claude: mock" in ok.stdout and "$9,454" in ok.stdout
+    strict = subprocess.run([sys.executable, "scripts/live_check.py", "--require-live"], cwd=root, env=env, capture_output=True, text=True)
+    assert strict.returncode == 1

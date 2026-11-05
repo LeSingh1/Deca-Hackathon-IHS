@@ -1,5 +1,7 @@
 # ShadowBuyer for Main Street
 
+[![CI](https://github.com/LeSingh1/Deca-Hackathon-IHS/actions/workflows/ci.yml/badge.svg)](https://github.com/LeSingh1/Deca-Hackathon-IHS/actions/workflows/ci.yml)
+
 **A swarm of AI agents that gets independent restaurant owners their card-processing money back, over text.**
 
 The owner texts a photo of their card-processing statement. The swarm finds the hidden fees, translates the "simple factor" cash advance in their inbox into a real APR, and negotiates a lower rate with the processor. After the owner replies **YES**, it executes the fix in a sandbox and hands them a lender-ready PDF.
@@ -58,7 +60,7 @@ Owner texts statement photo (Twilio SMS or the phone simulator, same webhook han
 | Savings sweep | With a `sk_test_` key: **Stripe test mode** PaymentIntent with metadata `bucket=Tax & Rainy-Day reserve`. Without one, a labeled mock. `sk_live_` keys are refused. No real money moves either way. Production rail would be FedNow. |
 | SMS | Twilio sandbox/trial number if configured; otherwise the in-app phone simulator (same handler) |
 | Memory | Local JSON file: owner profile, past statements, decisions, winning tactics. On the next run the winning negotiator opens from what worked; the offers still come from the ladder. |
-| A real owner's statement | The fee analysis uses the parsed statement, but the merchant agreement, cash-advance offer, MID, owner name and processor rep are still the fictional fixtures. This shows the flow end to end; it isn't ready for real owners to rely on. |
+| A real owner's statement | They get only what their own statement shows: hidden fees, their all-in rate and an illustrative fair benchmark. The negotiation, contract markup, approval and sweep use a simulated rep and fictional documents, so they run only in the demo, and the owner is told nobody was contacted. |
 
 ## Models (`src/llm/models.py`, the only place they're set)
 
@@ -119,7 +121,7 @@ Then click **Run demo**, or text a statement photo (or the word DEMO for the sam
 
 ```bash
 python3 -m venv .venv && .venv/bin/python -m pip install -r requirements-dev.txt
-.venv/bin/python -m pytest -q    # 85 tests, ~3 s
+.venv/bin/python -m pytest -q    # 88 tests, ~3 s
 cd frontend && npm ci && npm run typecheck
 ```
 
@@ -127,7 +129,7 @@ cd frontend && npm ci && npm run typecheck
 - `tests/test_contract.py`: the Python and TypeScript contracts agree.
 - `tests/test_pipeline.py`: a zero-env end-to-end run whose headline numbers are recomputed independently from the fixtures; no action before approval and none after NO; Stripe refuses live keys; memory makes the second run smarter; live mode calls exactly the models in `models.py` (and still yields the calculator numbers when the model returns nothing); the simulator → SSE → YES → PDF API flow.
 - `tests/test_llm_sdk.py`: the real Anthropic SDK against a mocked HTTP transport.
-- `tests/test_hardening.py`: path traversal, natural yes/no/unclear replies, forged and misrouted approvals, Twilio signatures, malformed input, real uploads never showing fixture numbers, sandbox labels, memory.
+- `tests/test_hardening.py`: path traversal, natural yes/no/unclear replies, forged and misrouted approvals, Twilio signatures, malformed input, real uploads never showing fixture numbers or claiming a negotiation, sandbox labels, memory, the live-check script.
 
 ## Repo layout
 
@@ -147,7 +149,8 @@ src/
 frontend/       Vite + React 19 + Motion, two-screen UI
 fixtures/       fictional statement (JSON + PDF), taxonomy, benchmarks, quotes, MCA offer, agreement, redlines, ladder
 tests/          calculators, contract drift, pipeline, SDK-level LLM, hardening
-scripts/        dev.sh (one command), make_statement_pdf.py
+scripts/        dev.sh (one command), live_check.py (confirm live keys), make_statement_pdf.py
+.github/        CI: tests, typecheck, build, and a smoke test of the real Docker image
 demo/           the demo video and its poster frame
 legacy/         the pre-hackathon procurement ShadowBuyer, unchanged (see PRIOR_WORK.md)
 ```
@@ -156,8 +159,15 @@ See [DEMO.md](DEMO.md) for the 3-minute script and [PRIOR_WORK.md](PRIOR_WORK.md
 
 ## Status
 
-**Verified:** the full demo runs in a real browser with zero keys (both YES and NO paths), and the 85 tests, typecheck and production build all pass.
+**Verified:** the full demo runs in a real browser with zero keys (both YES and NO paths). CI runs the 88 tests, typecheck and production build on Python 3.12 and Node 22, then builds the Docker image and smoke-tests the running container.
 
-**Not yet exercised against the real services:** live Claude calls (tested through the real SDK with a mocked HTTP transport), Stripe test mode, Twilio delivery, and the Docker image itself (its build steps were run by hand, without Docker). Run these with real keys before relying on them.
+**Not yet exercised against the real services:** live Claude calls (tested through the real SDK with a mocked HTTP transport), Stripe test mode and Twilio delivery. To check Claude and Stripe once you have keys (this makes real, paid API calls):
+
+```bash
+cp .env.example .env    # add your keys
+set -a; . ./.env; set +a; .venv/bin/python scripts/live_check.py --require-live
+```
+
+Twilio needs a real number and a text to it.
 
 *Informational only; not legal or financial advice.*

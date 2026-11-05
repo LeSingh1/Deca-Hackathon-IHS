@@ -1,0 +1,45 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - run: python -m pytest -q
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm ci --no-audit --no-fund
+        working-directory: frontend
+      - run: npm run typecheck
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t shadowbuyer .
+      - run: docker run -d --name sb -p 8000:8000 shadowbuyer
+      - name: Smoke test the running image
+        run: |
+          for i in $(seq 1 30); do curl -sf http://localhost:8000/healthz && break; sleep 1; done
+          curl -sf http://localhost:8000/ | grep -q '<title>ShadowBuyer'
+          ! curl -s --path-as-is 'http://localhost:8000/..%2f..%2f..%2fetc%2fpasswd' | grep -q 'root:'
+          RUN=$(curl -sf -X POST 'http://localhost:8000/api/demo/start?pace=instant' | python3 -c 'import json,sys;print(json.load(sys.stdin)["run_id"])')
+          for i in $(seq 1 30); do curl -sf "http://localhost:8000/api/runs/$RUN" | grep -q '"awaiting":"apv_' && break; sleep 0.5; done
+          curl -sf -X POST http://localhost:8000/api/sms/inbound -H 'content-type: application/json' -d "{\"body\":\"yes please\",\"run_id\":\"$RUN\"}"
+          for i in $(seq 1 30); do curl -sf "http://localhost:8000/api/runs/$RUN" | grep -q '"finished":true' && break; sleep 0.5; done
+          curl -sf "http://localhost:8000/api/runs/$RUN" | grep -q 'savings_sweep'
+          curl -sf "http://localhost:8000/api/runs/$RUN/report.pdf" | head -c 4 | grep -q '%PDF'
+      - if: always()
+        run: docker logs sb

@@ -31,7 +31,7 @@ The product, customer, money math, agents, UI and integrations are new:
 | Report | Server-side lender/accountant-ready PDF (reportlab) with the MCA paydown chart |
 | Fixtures | Fictional statement (JSON + PDF), fee taxonomy, benchmarks, competitor quotes, MCA offer, merchant agreement, redlines, negotiation ladder |
 | Frontend | New Vite + React 19 + Motion app: two-screen layout, new visual design, all animations |
-| Tests | 85 tests: calculators, contract drift, end-to-end mock run, approval gate, live-model routing, API, and hardening (path traversal, forged approvals, reply parsing, malformed input) |
+| Tests | 88 tests: calculators, contract drift, end-to-end mock run, approval gate, live-model routing, API, and hardening (path traversal, forged approvals, reply parsing, malformed input) |
 
 ## What carried over as ideas (not code)
 

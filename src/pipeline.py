@@ -121,6 +121,18 @@ def run(ctx: RunContext) -> Iterator[dict]:
            "effective_rate": b.current_rate, "breakdown": breakdown.by_category, "quotes": quotes}
     yield _done("rate_scout", t0)
 
+    if any(m.startswith("file:") for m in ctx.media):
+        # A real owner: the steps below use a simulated rep and the fictional agreement and
+        # cash advance, so they stop here with only what their own statement shows.
+        fair = next(q for q in quotes if q["kind"] == "benchmark")
+        store.write("statements", f"{ctx.phone}:{statement['period']['label']}",
+                    {"effective_rate": b.current_rate, "total_fees": breakdown.total})
+        yield owner_say(action_drafter.real_statement_sms(
+            hidden_monthly=breakdown.processor_controlled, current_rate=b.current_rate,
+            fair_rate=fair["effective_rate"], annual=fair["annual_savings"], processor=statement["processor"]), ctx)
+        yield {"event": "done", "ok": True}
+        return
+
     # 4 ── Negotiator swarm + Referee ─────────────────────────────────
     t0 = time.monotonic()
     prior = store.read("tactics", statement["processor"])

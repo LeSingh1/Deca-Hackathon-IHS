@@ -48,6 +48,21 @@ def sms_summary(*, hidden_monthly: float, current_rate: float, new_rate: float, 
     return "\n".join(lines)
 
 
+def real_statement_sms(*, hidden_monthly: float, current_rate: float, fair_rate: float, annual: float,
+                       processor: str) -> str:
+    """For a real owner: only what the statement shows. Negotiating for them isn't live, so never imply it."""
+    lines = [f"Found {money(hidden_monthly)}/mo in markup + junk fees on your {processor} statement. "
+             f"You pay {pct(current_rate)} all-in."]
+    if annual > 0:
+        lines.append(f"A fair interchange-plus price would be about {pct(fair_rate)}, or {money(annual)}/yr less "
+                     "(illustrative benchmark).")
+    else:
+        lines.append("That's already close to a fair interchange-plus price (illustrative benchmark).")
+    lines.append(f"I haven't contacted {processor} or moved any money. Negotiating for you isn't live yet, "
+                 "so ask them for interchange-plus pricing and to drop those fees.")
+    return "\n".join(lines)
+
+
 def _template_email(statement: dict, winner_final: dict, owner: str) -> dict:
     rep = fixtures.load("negotiation")["rep"]
     plan = winner_final["plan"]
